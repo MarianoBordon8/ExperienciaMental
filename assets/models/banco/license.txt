@@ -1,0 +1,8 @@
+Model Information:
+* title:	Single School Desk
+* source:	https://sketchfab.com/3d-models/single-school-desk-ddfb05da12524ddc870f0527f29c8c76
+* author:	mehmetalikeve (https://sketchfab.com/mehmetalikeve)
+
+Model License:
+* license type:	SKETCHFAB Standard (https://sketchfab.com/licenses)
+* requirements:	Under basic restrictions, use worldwide, on all types of media, commercially or not, and in all types of derivative works
