@@ -72,7 +72,7 @@ const posicionesBancos = [
 
 posicionesBancos.forEach(pos => {
   loader.load(
-    './assets/models/banco/banco.gltf',
+    './assets/models/banco/banco/banco.gltf',
     function(gltf) {
       const banco = gltf.scene;
       banco.position.set(pos[0], pos[1], pos[2]);
@@ -86,6 +86,65 @@ posicionesBancos.forEach(pos => {
     undefined,
     function(error) {
       console.error('Error cargando el banco:', error);
+    }
+  );
+});
+
+const posicionesSillas = [
+  [-2, 0.25, -6], [2, 0.25, -6],   // Fila trasera
+  [-2, 0.25, -2],  [2, 0.25, -2],    // Fila del medio
+  [-2, 0.25, 2],  [2, 0.25, 2]     // Fila delantera
+];
+
+posicionesSillas.forEach(pos => {
+  loader.load(
+    './assets/models/banco/silla/silla.gltf',
+    function(gltf) {
+      const silla = gltf.scene;
+      silla.position.set(pos[0], pos[1], pos[2]);
+      silla.scale.set(1.5, 1.5, 1.5);
+      escena.add(silla);
+
+      // Crear caja de colisión
+      const caja = new THREE.Box3().setFromObject(silla);
+      colisionesBancos.push(caja);
+    },
+    undefined,
+    function(error) {
+      console.error('Error cargando el banco:', error);
+    }
+  );
+});
+
+// Cargar personajes en todas las sillas
+posicionesSillas.forEach((sillaPos, index) => {
+  if (index === 2) return; // salta esta silla
+  loader.load(
+    'assets/models/personajes/personaje1/personaje1glb.gltf',
+    function(gltf) {
+      // Clonar el modelo para que cada personaje sea independiente
+      const personaje = gltf.scene.clone();
+
+      // Ajustar la posición sobre la silla
+      const alturaAsiento = -0.8; // ajustá según tu modelo de silla
+      personaje.position.set(
+        sillaPos[0] - 0.5,             // X de la silla
+        sillaPos[1] + alturaAsiento, // Y (altura del asiento)
+        sillaPos[2]              // Z de la silla
+      );
+
+      // Escala del personaje
+      personaje.scale.set(3, 3, 3);
+
+      // Rotación para mirar hacia la pizarra (180°)
+      personaje.rotation.y = Math.PI + 3.1;
+
+      // Agregar a la escena
+      escena.add(personaje);
+    },
+    undefined,
+    function(error) {
+      console.error('Error cargando el personaje en la silla', index, error);
     }
   );
 });
