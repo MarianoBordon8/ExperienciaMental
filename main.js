@@ -4,6 +4,7 @@ escena.background = new THREE.Color("#48bfeb"); // Azul
 
 // Importar GLTFLoader
 import { GLTFLoader } from './libs/GLTFLoader.js';
+const loader = new GLTFLoader;
 
 // Cámara de perspectiva
 const fov = 75;
@@ -17,32 +18,64 @@ camara.position.set(0, 0, 5);
 // Renderizador
 const renderizador = new THREE.WebGLRenderer({
   canvas: document.querySelector("#miCanvas"),
-  antialias: true
+  antialias: false
 });
+renderizador.toneMapping = THREE.LinearToneMapping;
+renderizador.toneMappingExposure = 1.0; // Adjust if needed
 renderizador.setSize(window.innerWidth, window.innerHeight);
 
-// Agregar una luz Direccional
-const luz = new THREE.DirectionalLight(0xffffff, 2);
-luz.position.set(5, 5, 5);
-escena.add(luz);
+// // Agregar una luz Direccional
+// const luz = new THREE.DirectionalLight(0xffffff, 2);
+// luz.position.set(5, 5, 5);
+// escena.add(luz);
 
-// Crear una caja más grande que simule una habitación con paredes de distintos colores
-const habitacionGeometry = new THREE.BoxGeometry(20, 10, 20);
+// // Crear una caja más grande que simule una habitación con paredes de distintos colores
+// const habitacionGeometry = new THREE.BoxGeometry(20, 10, 20);
 
-// Colores para cada cara: [derecha, izquierda, arriba, abajo, frente, atrás]
-const materialesHabitacion = [
-  new THREE.MeshStandardMaterial({ color: 0xff4444, side: THREE.BackSide }), // derecha
-  new THREE.MeshStandardMaterial({ color: 0x44ff44, side: THREE.BackSide }), // izquierda
-  new THREE.MeshStandardMaterial({ color: 0x4444ff, side: THREE.BackSide }), // arriba (techo)
-  new THREE.MeshStandardMaterial({ color: 0xffff44, side: THREE.BackSide }), // abajo (suelo)
-  new THREE.MeshStandardMaterial({ color: 0xff44ff, side: THREE.BackSide }), // frente
-  new THREE.MeshStandardMaterial({ color: 0x44ffff, side: THREE.BackSide })  // atrás
-];
+// // Colores para cada cara: [derecha, izquierda, arriba, abajo, frente, atrás]
+// const materialesHabitacion = [
+//   new THREE.MeshStandardMaterial({ color: 0xff4444, side: THREE.BackSide }), // derecha
+//   new THREE.MeshStandardMaterial({ color: 0x44ff44, side: THREE.BackSide }), // izquierda
+//   new THREE.MeshStandardMaterial({ color: 0x4444ff, side: THREE.BackSide }), // arriba (techo)
+//   new THREE.MeshStandardMaterial({ color: 0xffff44, side: THREE.BackSide }), // abajo (suelo)
+//   new THREE.MeshStandardMaterial({ color: 0xff44ff, side: THREE.BackSide }), // frente
+//   new THREE.MeshStandardMaterial({ color: 0x44ffff, side: THREE.BackSide })  // atrás
+// ];
 
-// Mueve la habitación para que el suelo esté en y = 0
-const habitacion = new THREE.Mesh(habitacionGeometry, materialesHabitacion);
-habitacion.position.set(0, 5 / 2, 0); // La base (suelo) queda en y = 0
-escena.add(habitacion);
+// // Mueve la habitación para que el suelo esté en y = 0
+// const habitacion = new THREE.Mesh(habitacionGeometry, materialesHabitacion);
+// habitacion.position.set(0, 5 / 2, 0); // La base (suelo) queda en y = 0
+// escena.add(habitacion);
+
+// Cargar el modelo 3D de la habitación (aula)
+loader.load(
+  './assets/models/classroom.glb', // Ruta del modelo 3D
+  function(gltf) {
+    const classroom = gltf.scene;
+
+    // Ajustar la posición de la habitación
+    classroom.position.set(0, 0, 0); // Ajusta según necesites
+
+    // Escalar si es necesario
+    classroom.scale.set(1, 1, 1); // Ajusta según el tamaño del modelo
+
+    // Agregar a la escena
+    escena.add(classroom);
+
+    // // Filtrar o excluir los elementos que no te interesan (como las mesas)
+    // // Suponiendo que el modelo tiene una estructura de nodos, puedes recorrerla y eliminar los nodos de las mesas
+    // classroom.traverse((child) => {
+    //   if (child.name.includes("mesa")) { // Si el nombre del nodo contiene "mesa", lo eliminamos
+    //     child.visible = false; // O child.parent.remove(child) si prefieres eliminarlo completamente
+    //   }
+    // });
+  },
+  undefined,
+  function(error) {
+    console.error('Error cargando la clase:', error);
+  }
+);
+
 
 // Definir límites de la habitación (paredes internas)
 const margen = 0.5; // grosor de la "cámara"
@@ -62,117 +95,117 @@ camara.position.set(0, 1, 5); // Altura de "ojos" sobre el suelo
 // Arreglo para guardar las cajas de colisión de cada banco
 const colisionesBancos = [];
 
-// Cargar bancos en 3 filas de 2 con pasillo
-const loader = new GLTFLoader();
-const posicionesBancos = [
-  [-2, 0.25, -4], [2, 0.25, -4],   // Fila trasera
-  [-2, 0.25, 0],  [2, 0.25, 0],    // Fila del medio
-  [-2, 0.25, 4],  [2, 0.25, 4]     // Fila delantera
-];
+// // Cargar bancos en 3 filas de 2 con pasillo
+// const loader = new GLTFLoader();
+// const posicionesBancos = [
+//   [-2, 0.25, -4], [2, 0.25, -4],   // Fila trasera
+//   [-2, 0.25, 0],  [2, 0.25, 0],    // Fila del medio
+//   [-2, 0.25, 4],  [2, 0.25, 4]     // Fila delantera
+// ];
 
-posicionesBancos.forEach(pos => {
-  loader.load(
-    './assets/models/banco/banco/banco.gltf',
-    function(gltf) {
-      const banco = gltf.scene;
-      banco.position.set(pos[0], pos[1], pos[2]);
-      banco.scale.set(1.5, 1.5, 1.5);
-      escena.add(banco);
+// posicionesBancos.forEach(pos => {
+//   loader.load(
+//     './assets/models/banco/banco/banco.gltf',
+//     function(gltf) {
+//       const banco = gltf.scene;
+//       banco.position.set(pos[0], pos[1], pos[2]);
+//       banco.scale.set(1.5, 1.5, 1.5);
+//       escena.add(banco);
 
-      // Crear caja de colisión
-      const caja = new THREE.Box3().setFromObject(banco);
-      colisionesBancos.push(caja);
-    },
-    undefined,
-    function(error) {
-      console.error('Error cargando el banco:', error);
-    }
-  );
-});
+//       // Crear caja de colisión
+//       const caja = new THREE.Box3().setFromObject(banco);
+//       colisionesBancos.push(caja);
+//     },
+//     undefined,
+//     function(error) {
+//       console.error('Error cargando el banco:', error);
+//     }
+//   );
+// });
 
-const posicionesSillas = [
-  [-2, 0.25, -6], [2, 0.25, -6],   // Fila trasera
-  [-2, 0.25, -2],  [2, 0.25, -2],    // Fila del medio
-  [-2, 0.25, 2],  [2, 0.25, 2]     // Fila delantera
-];
+// const posicionesSillas = [
+//   [-2, 0.25, -6], [2, 0.25, -6],   // Fila trasera
+//   [-2, 0.25, -2],  [2, 0.25, -2],    // Fila del medio
+//   [-2, 0.25, 2],  [2, 0.25, 2]     // Fila delantera
+// ];
 
-posicionesSillas.forEach(pos => {
-  loader.load(
-    './assets/models/banco/silla/silla.gltf',
-    function(gltf) {
-      const silla = gltf.scene;
-      silla.position.set(pos[0], pos[1], pos[2]);
-      silla.scale.set(1.5, 1.5, 1.5);
-      escena.add(silla);
+// posicionesSillas.forEach(pos => {
+//   loader.load(
+//     './assets/models/banco/silla/silla.gltf',
+//     function(gltf) {
+//       const silla = gltf.scene;
+//       silla.position.set(pos[0], pos[1], pos[2]);
+//       silla.scale.set(1.5, 1.5, 1.5);
+//       escena.add(silla);
 
-      // Crear caja de colisión
-      const caja = new THREE.Box3().setFromObject(silla);
-      colisionesBancos.push(caja);
-    },
-    undefined,
-    function(error) {
-      console.error('Error cargando el banco:', error);
-    }
-  );
-});
+//       // Crear caja de colisión
+//       const caja = new THREE.Box3().setFromObject(silla);
+//       colisionesBancos.push(caja);
+//     },
+//     undefined,
+//     function(error) {
+//       console.error('Error cargando el banco:', error);
+//     }
+//   );
+// });
 
-// Cargar personajes en todas las sillas
-posicionesSillas.forEach((sillaPos, index) => {
-  if (index === 2) return; // salta esta silla
-  loader.load(
-    'assets/models/personajes/personaje1/personaje1glb.gltf',
-    function(gltf) {
-      // Clonar el modelo para que cada personaje sea independiente
-      const personaje = gltf.scene.clone();
+// // Cargar personajes en todas las sillas
+// posicionesSillas.forEach((sillaPos, index) => {
+//   if (index === 2) return; // salta esta silla
+//   loader.load(
+//     'assets/models/personajes/personaje1/personaje1glb.gltf',
+//     function(gltf) {
+//       // Clonar el modelo para que cada personaje sea independiente
+//       const personaje = gltf.scene.clone();
 
-      // Ajustar la posición sobre la silla
-      const alturaAsiento = -0.8; // ajustá según tu modelo de silla
-      personaje.position.set(
-        sillaPos[0] - 0.5,             // X de la silla
-        sillaPos[1] + alturaAsiento, // Y (altura del asiento)
-        sillaPos[2]              // Z de la silla
-      );
+//       // Ajustar la posición sobre la silla
+//       const alturaAsiento = -0.8; // ajustá según tu modelo de silla
+//       personaje.position.set(
+//         sillaPos[0] - 0.5,             // X de la silla
+//         sillaPos[1] + alturaAsiento, // Y (altura del asiento)
+//         sillaPos[2]              // Z de la silla
+//       );
 
-      // Escala del personaje
-      personaje.scale.set(3, 3, 3);
+//       // Escala del personaje
+//       personaje.scale.set(3, 3, 3);
 
-      // Rotación para mirar hacia la pizarra (180°)
-      personaje.rotation.y = Math.PI + 3.1;
+//       // Rotación para mirar hacia la pizarra (180°)
+//       personaje.rotation.y = Math.PI + 3.1;
 
-      // Agregar a la escena
-      escena.add(personaje);
-    },
-    undefined,
-    function(error) {
-      console.error('Error cargando el personaje en la silla', index, error);
-    }
-  );
-});
+//       // Agregar a la escena
+//       escena.add(personaje);
+//     },
+//     undefined,
+//     function(error) {
+//       console.error('Error cargando el personaje en la silla', index, error);
+//     }
+//   );
+// });
 
 
 
-// Cargar pizarra en la pared
-loader.load(
-  './assets/models/pizarra/pizarra.gltf',  // <-- ruta a tu modelo descargado
-  function(gltf) {
-    const pizarra = gltf.scene;
+// // Cargar pizarra en la pared
+// loader.load(
+//   './assets/models/pizarra/pizarra.gltf',  // <-- ruta a tu modelo descargado
+//   function(gltf) {
+//     const pizarra = gltf.scene;
 
-    // Posición: centrada en la pared opuesta
-    pizarra.position.set(0, 2, 9.9); // Z positivo para la pared opuesta
+//     // Posición: centrada en la pared opuesta
+//     pizarra.position.set(0, 2, 9.9); // Z positivo para la pared opuesta
 
-    // Escalar según necesites
-    pizarra.scale.set(3, 2, 0.1); // ancho x alto x profundidad
+//     // Escalar según necesites
+//     pizarra.scale.set(3, 2, 0.1); // ancho x alto x profundidad
 
-    // Rotar 180 grados para que mire hacia el aula
-    pizarra.rotation.y = Math.PI;
+//     // Rotar 180 grados para que mire hacia el aula
+//     pizarra.rotation.y = Math.PI;
 
-    escena.add(pizarra);
-  },
-  undefined,
-  function(error) {
-    console.error('Error cargando la pizarra:', error);
-  }
-);
+//     escena.add(pizarra);
+//   },
+//   undefined,
+//   function(error) {
+//     console.error('Error cargando la pizarra:', error);
+//   }
+// );
 
 
 
@@ -181,9 +214,9 @@ loader.load(
 const luzAmbiente = new THREE.AmbientLight(0xffffff, 0.7); // Luz suave general
 escena.add(luzAmbiente);
 
-const luzPuntual = new THREE.PointLight(0xffffff, 1.5, 100); // Luz fuerte en el centro
-luzPuntual.position.set(0, 2, 0);
-escena.add(luzPuntual);
+// const luzPuntual = new THREE.PointLight(0xffffff, 1.5, 100); // Luz fuerte en el centro
+// luzPuntual.position.set(0, 2, 0);
+// escena.add(luzPuntual);
 
 // Controles básicos de primera persona con el mouse
 let isMouseDown = false;
@@ -276,7 +309,8 @@ function moverCamara() {
     }
   }
 }
-
+const gridHelper = new THREE.GridHelper(20, 20);
+escena.add(gridHelper);
 
 // Animación
 let clock = new THREE.Clock();
