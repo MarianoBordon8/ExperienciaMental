@@ -1,18 +1,141 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Primer Cubo con Three.js</title>
-  
-  <link rel="stylesheet" href="style.css" />
-</head>
-<body>
-  <!-- Canvas donde se renderiza la escena -->
-  <canvas id="miCanvas"></canvas>
+<!doctype html>
+<html>
+  <head>
+      <meta charset="utf-8">
+      <meta name="description" content="">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <title>Que es la normalidad?</title>
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+      <link href="https://fonts.googleapis.com/css?family=Nunito+Sans:300,400,600,700,800,900" rel="stylesheet">
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/railscasts.min.css">
+      <link rel="stylesheet" href="scribbler-global.css">
+      <link rel="stylesheet" href="scribbler-landing.css">
+      <link rel="author" href="humans.txt">
+  </head>
+  <body>
+    <div class="pagina-elejir-opcion">
+    <nav>
+      <div class="logo"></div>
+      <ul class="menu">
+        <div class="menu__item toggle"><span></span></div>
+        <li class="menu__item"><a href="doc.html" class="link link--dark"><i class="fa fa-book"></i> Sobre este Proyecto</a></li>
+        <li class="menu__item"><a href="agregargithub" class="link link--dark"><i class="fa fa-github"></i> Github</a></li>
+      </ul>
+    </nav>
+    <div class="hero">
+      <h1 class="hero__title">TITULO</h1>
+      <p class="hero__description">Una experiencia 3D interactiva que demuestra diferentes de diferentes maneras que siente cada una de las personas</p>
+    </div>
+    <div class="hero__terminal">
+      <pre>
+        <!-- Place your demo code here -->
+        <code class="shell-session demo">HOLA ESTO FUNCIONA? </code>
+      </pre>
+    </div>
+    <div class="wrapper">
+      <!-- <div class="installation">
+        <h3 class="section__title">Installation</h3>
+        <div class="tab__container">
+          <ul class="tab__menu">
+            <li class="tab active" data-tab="mac">mac</li>
+            <li class="tab" data-tab="linux">linux</li>
+            <li class="tab" data-tab="win">win</li>
+          </ul>
+          <pre class="nohighlight code">  
+            <pre class="tab__pane active mac">Elije esta experiencia, decimos el nombre? que hacemos?
+              <button class="tab__pane active mac">Elegir</button>
+            </pre>
+            <pre class="tab__pane linux">Elije esta experiencia, decimos el nombre? que hacemos? se puede cambiar este texto</pre>
+            <button class="tab__pane linux">Elegir</button>
+            <pre class="tab__pane win">Elije esta experiencia, JUAN</pre>
+            <button class="tab__pane win">Elegir</button>
+          </pre>
+        </div> -->
+        <div class="installation">
+  <h3 class="section__title">Seleccion de personaje</h3>
+  <div class="tab__container">
+    <ul class="tab__menu">
+      <li class="tab active" data-tab="mac">Juan</li>
+      <li class="tab" data-tab="linux">Mario</li>
+      <li class="tab" data-tab="win">Franco</li>
+    </ul>
 
-  <!-- Código principal con módulos -->
-  <script type="module" src="main.js"></script>
+    <div class="tab__pane active mac">
+      <pre class="nohighlight code">
+Elije esta experiencia, decimos el nombre? que hacemos?
+      </pre>
+      <button id="start-game-btn1" class="button--secondary">Elegir 1</button>
+    </div>
+
+    <div class="tab__pane linux">
+      <pre class="nohighlight code">
+Elije esta experiencia, decimos el nombre? que hacemos? se puede cambiar este texto
+      </pre>
+      <button id="start-game-btn2" class="button--secondary">Elegir 2</button>
+    </div>
+
+    <div class="tab__pane win">
+      <pre class="nohighlight code">
+Elije esta experiencia, tiene historia y demas pero solo una linea de texto
+      </pre>
+      <button id="start-game-btn3" class="button--secondary">Elegir 3</button>
+    </div>
+
+  </div>
+</div>
+      </div>
+      <div class="feature">
+        <div class="feature__item">
+          <h3 class="section__title">TEXTO 1</h3>
+          <p>Start writing your notes immediately in any terminal! No more time wasted on navigating and opening your text editor.</p>
+        </div>
+        <div class="feature__item">
+          <h3 class="section__title">TEXTO 2</h3>
+          <p>Save your file in Dropbox then you can access to it from anywhere.</p>
+        </div>
+        <div class="feature__item">
+          <h3 class="section__title">TEXTO 3</h3>
+          <p>Encrypt your notes optionally. No one can get to your secrets! </p>
+        </div>
+        <!-- <div class="feature__item">
+          <h3 class="section__title">TEXTO 4</h3>
+          <p>Maintain all your settings in a single <span class="code code--inline">config.json</span> file. Never need to redo the setting every single time jotting down a note.</p>
+        </div>
+        <div class="feature__item">
+          <h3 class="section__title">TEXTO 5</h3>
+          <p>For better readability, scribbler has a clean, beautiful color scheme allow you to scan files fast.</p>
+        </div>
+        <div class="feature__item">
+          <h3 class="section__title">TEXTO 6</h3>
+          <p>You can expect common keybindings for scribbler. Customize <span class="code code--inline">bindings.json</span> for your own liking! </p>
+        </div> -->
+      </div>
+      <div class="keybinding">
+        <ul class="keybinding__detail">
+          <h3 class="keybinding__title">Como Jugar?</h3>
+          <li>Mover Camara <span class="keybinding__label">Click Izquierdo + Mouse</span></li>
+          <li>Caminar hacia adelante <span class="keybinding__label">W</span></li>
+          <li>Interactuar <span class="keybinding__label">E</span></li>
+          <li>algo mas? <span class="keybinding__label">alguna tecla</span></li>
+        </ul>
+      </div>
+      <div class="callout">
+        <p>Puedes encontrar mas informacion sobre nosotros aqui</p>
+        <a href="doc.html" class="button--primary">Sobre este Proyecto</a>
+      </div>
+      <footer class="footer">Creado por Nicolas Murua, Mariano  .....  , Santino ....  </footer>
+    </div>
+    <div class="threejsCanvas" style="display: none">
+    <!-- Canvas donde se renderiza la escena -->
+  <canvas id="miCanvas"></canvas>
+  <div class="progress-bar-container">
+    <label for="progress-bar">Loading...</label>
+    <progress id="progress-bar" value="0" max="100"></progress>
+  </div>
+  </div>
+    <script type="module" src="main.js"></script>
+      <!-- Código principal con módulos -->
+  <!-- <script  src="main.js"></script> -->
   <script src="libs/three.min.js"></script> 
-</body>
+  </body>
 </html>
