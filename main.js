@@ -21,23 +21,24 @@ const renderizador = new THREE.WebGLRenderer({
 });
 renderizador.setSize(window.innerWidth, window.innerHeight);
 
-// Agregar una luz Direccional
-const luz = new THREE.DirectionalLight(0xffffff, 2);
-luz.position.set(5, 5, 5);
-escena.add(luz);
 
 // Crear una caja más grande que simule una habitación con paredes de distintos colores
 const habitacionGeometry = new THREE.BoxGeometry(20, 10, 20);
+const loaderTextura = new THREE.TextureLoader();
+const texturaSuelo = loaderTextura.load('./assets/textures/suelo/Planks021_1K-JPG_Color.jpg');
+const texturaParedes = loaderTextura.load('./assets/textures/paredes/Plaster003_1K-JPG_Color.jpg');
+const texturaTecho = loaderTextura.load('./assets/textures/techo/OfficeCeiling001_1K-JPG_AmbientOcclusion.jpg');
 
 // Colores para cada cara: [derecha, izquierda, arriba, abajo, frente, atrás]
 const materialesHabitacion = [
-  new THREE.MeshStandardMaterial({ color: 0xff4444, side: THREE.BackSide }), // derecha
-  new THREE.MeshStandardMaterial({ color: 0x44ff44, side: THREE.BackSide }), // izquierda
-  new THREE.MeshStandardMaterial({ color: 0x4444ff, side: THREE.BackSide }), // arriba (techo)
-  new THREE.MeshStandardMaterial({ color: 0xffff44, side: THREE.BackSide }), // abajo (suelo)
-  new THREE.MeshStandardMaterial({ color: 0xff44ff, side: THREE.BackSide }), // frente
-  new THREE.MeshStandardMaterial({ color: 0x44ffff, side: THREE.BackSide })  // atrás
+  new THREE.MeshStandardMaterial({ map: texturaParedes, side: THREE.BackSide }), // derecha
+  new THREE.MeshStandardMaterial({ map: texturaParedes, side: THREE.BackSide }), // izquierda
+  new THREE.MeshStandardMaterial({ map: texturaTecho, side: THREE.BackSide }), // arriba (techo)
+  new THREE.MeshStandardMaterial({ map: texturaSuelo, side: THREE.BackSide }), // abajo (suelo)
+  new THREE.MeshStandardMaterial({ map: texturaParedes, side: THREE.BackSide }), // frente
+  new THREE.MeshStandardMaterial({ map: texturaParedes, side: THREE.BackSide })  // atrás
 ];
+
 
 // Mueve la habitación para que el suelo esté en y = 0
 const habitacion = new THREE.Mesh(habitacionGeometry, materialesHabitacion);
@@ -57,7 +58,9 @@ const limites = {
 
 
 // Ubica la cámara dentro de la habitación, sobre el suelo
-camara.position.set(0, 1, 5); // Altura de "ojos" sobre el suelo
+camara.position.set(-2.5, 1, -1); // Altura de "ojos" sobre el suelo
+camara.rotation.y = Math.PI; // 180 grados
+
 
 // Arreglo para guardar las cajas de colisión de cada banco
 const colisionesBancos = [];
@@ -90,10 +93,44 @@ posicionesBancos.forEach(pos => {
   );
 });
 
+const posicionesLibros = [
+  [-2.2, 0.19, -2.5], [-0.2, 0.19, -2.5],   // Fila trasera
+  [-2.2, 0.19, -0.5],  [-0.2, 0.19, -0.5],    // Fila del medio
+];
+
+// Cargar libros sobre cada banco
+posicionesLibros.forEach(pos => {
+  loader.load(
+    './assets/models/libro/libro.gltf', // <-- ruta a tu modelo de libro
+    function(gltf) {
+      const libro = gltf.scene;
+
+      // Posición: encima del banco
+      const alturaBanco = 0.25 * 1.5; // altura del banco * escala usada
+      libro.position.set(
+        pos[0],             // X del banco
+        pos[1] + alturaBanco , // Y (un poquito por encima del banco)
+        pos[2]          // Z del banco
+      );
+
+      // Escalar según necesites
+      libro.scale.set(0.005, 0.005, 0.005);
+
+      // Agregar a la escena
+      escena.add(libro);
+    },
+    undefined,
+    function(error) {
+      console.error('Error cargando el libro:', error);
+    }
+  );
+});
+
+
 const posicionesSillas = [
-  [-2, 0.25, -6], [2, 0.25, -6],   // Fila trasera
-  [-2, 0.25, -2],  [2, 0.25, -2],    // Fila del medio
-  [-2, 0.25, 2],  [2, 0.25, 2]     // Fila delantera
+  [-2, 0.25, -5], [2, 0.25, -5],   // Fila trasera
+  [-2, 0.25, -1],  [2, 0.25, -1],    // Fila del medio
+  [-2, 0.25, 3],  [2, 0.25, 3]     // Fila delantera
 ];
 
 posicionesSillas.forEach(pos => {
@@ -177,13 +214,82 @@ loader.load(
 
 
 
-// Agregar una luz espacial (luz ambiental y luz puntual)
-const luzAmbiente = new THREE.AmbientLight(0xffffff, 0.7); // Luz suave general
+// Cargar ventana en la pared izquierda
+loader.load(
+  './assets/models/ventana/ventana.gltf',  // <-- ruta a tu modelo de ventana
+  function(gltf) {
+    const ventana = gltf.scene;
+
+    // Posición: pegada a la pared izquierda
+    ventana.position.set(9.9, 0, -2); // x = 9.9 (pared izquierda), y = 3 (altura), z = 0 (centro)
+
+    // Escala (ajustá según el tamaño real de tu modelo)
+    ventana.scale.set(0.02, 0.02, 0.02);
+
+    // Rotación: girar para que "mire" hacia adentro del aula
+    ventana.rotation.y = -Math.PI / 2;
+
+    escena.add(ventana);
+  },
+  undefined,
+  function(error) {
+    console.error('Error cargando la ventana:', error);
+  }
+);
+
+// Cargar puerta en la pared derecha
+loader.load(
+  './assets/models/puerta/puerta1.gltf',  // <-- ruta a tu modelo de ventana
+  function(gltf) {
+    const puerta = gltf.scene;
+
+    // Posición: pegada a la pared derecha
+    puerta.position.set(-5.9, -0.6, 2); // x = 9.9 (pared derecha), y = 3 (altura), z = 0 (centro)
+
+    // Escala (ajustá según el tamaño real de tu modelo)
+    puerta.scale.set(1, 1.5, 1.5);
+
+    // Rotación: girar para que "mire" hacia adentro del aula
+    //puerta.rotation.y = -Math.PI / 2;
+
+    escena.add(puerta);
+  },
+  undefined,
+  function(error) {
+    console.error('Error cargando la puerta:', error);
+  }
+);
+
+
+// Cargar profesor
+loader.load(
+  'assets/models/personajes/personaje2/scene.gltf',  // <-- ruta a tu modelo descargado
+  function(gltf) {
+    const profesor = gltf.scene;
+
+    // Posición: centrada en la pared opuesta
+    profesor.position.set(-5, -2.2 ,9); // Z positivo para la pared opuesta
+
+    // Escalar según necesites
+    profesor.scale.set(3, 3, 3); // ancho x alto x profundidad
+
+    // Rotar 180 grados para que mire hacia el aula
+    profesor.rotation.y = Math.PI;
+
+    escena.add(profesor);
+  },
+  undefined,
+  function(error) {
+    console.error('Error cargando la pizarra:', error);
+  }
+);
+
+
+
+// Agregar una luz espacial (luz ambiental)
+const luzAmbiente = new THREE.AmbientLight(0xffffff, 1.1); // Luz suave general
 escena.add(luzAmbiente);
 
-const luzPuntual = new THREE.PointLight(0xffffff, 1.5, 100); // Luz fuerte en el centro
-luzPuntual.position.set(0, 2, 0);
-escena.add(luzPuntual);
 
 // Controles básicos de primera persona con el mouse
 let isMouseDown = false;
@@ -232,59 +338,12 @@ window.addEventListener('keyup', function(e) {
   teclas[e.code] = false;
 });
 
-// Actualizar posición de la cámara según teclas (WASD)
-function moverCamara() {
-  direccion.set(0, 0, 0);
-
-  if (teclas['KeyW']) direccion.z -= 1;
-  if (teclas['KeyS']) direccion.z += 1;
-  if (teclas['KeyA']) direccion.x -= 1;
-  if (teclas['KeyD']) direccion.x += 1;
-  if (teclas['KeyE']) direccion.y += 1;
-  if (teclas['KeyQ']) direccion.y -= 1;
-
-  if (direccion.length() > 0) {
-    direccion.normalize();
-    const matriz = new THREE.Matrix4();
-    matriz.makeRotationY(camara.rotation.y);
-    direccion.applyMatrix4(matriz);
-
-    const nuevaPosicion = camara.position.clone().addScaledVector(direccion, velocidad);
-
-    // Verificar límites de la habitación
-    const dentroLimites = nuevaPosicion.x > limites.xMin && nuevaPosicion.x < limites.xMax &&
-                          nuevaPosicion.y > limites.yMin && nuevaPosicion.y < limites.yMax &&
-                          nuevaPosicion.z > limites.zMin && nuevaPosicion.z < limites.zMax;
-
-    // Crear caja de la cámara (punto de colisión)
-    const cajaCamara = new THREE.Box3(
-      new THREE.Vector3(nuevaPosicion.x - 0.2, nuevaPosicion.y - 0.5, nuevaPosicion.z - 0.2),
-      new THREE.Vector3(nuevaPosicion.x + 0.2, nuevaPosicion.y + 0.5, nuevaPosicion.z + 0.2)
-    );
-
-    // Verificar colisión con cada banco
-    let colision = false;
-    for (const cajaBanco of colisionesBancos) {
-      if (cajaCamara.intersectsBox(cajaBanco)) {
-        colision = true;
-        break;
-      }
-    }
-
-    if (dentroLimites && !colision) {
-      camara.position.copy(nuevaPosicion);
-    }
-  }
-}
-
-
 // Animación
 let clock = new THREE.Clock();
 function animar() {
   requestAnimationFrame(animar);
-
-  moverCamara(); // Agrega movimiento tipo showroom
-
+  
+  
   // Llamado al renderizador
   renderizador.render(escena, camara);
 }

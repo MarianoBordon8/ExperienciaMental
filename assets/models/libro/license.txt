@@ -1,0 +1,11 @@
+Model Information:
+* title:	Book
+* source:	https://sketchfab.com/3d-models/book-77ec5a1993214bf9a24170ed748e3b06
+* author:	Xipeng Wang (https://sketchfab.com/1741896354)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Book" (https://sketchfab.com/3d-models/book-77ec5a1993214bf9a24170ed748e3b06) by Xipeng Wang (https://sketchfab.com/1741896354) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
