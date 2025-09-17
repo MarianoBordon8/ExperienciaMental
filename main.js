@@ -295,30 +295,20 @@ video.addEventListener('canplay', function() {
   televisorVideo.visible = false; // Oculto al inicio
   escena.add(televisorVideo);
 
-  // Iniciar el video si no se reproduce automáticamente
+  // Asegura que el video esté siempre en reproducción
   if (video.paused) {
     video.play();
   }
 });
 
-// Función para alternar entre imagen y video
-function alternarTelevisor() {
-  usandoVideo = !usandoVideo;
-  if (televisorImagen && televisorVideo) {
-    televisorImagen.visible = !usandoVideo;
-    televisorVideo.visible = usandoVideo;
-    if (usandoVideo) {
-      video.play();
-    } else {
-      video.pause();
-    }
-  }
-}
-
 // Evento para alternar con la tecla "C"
 window.addEventListener('keydown', function(e) {
   if (e.code === 'KeyC') {
-    alternarTelevisor();
+    usandoVideo = !usandoVideo;
+    // El video nunca se pausa, solo se oculta o muestra
+    if (usandoVideo && video.paused) {
+      video.play();
+    }
   }
 });
 
@@ -450,8 +440,12 @@ let clock = new THREE.Clock();
 function animar() {
   requestAnimationFrame(animar);
 
+  // Actualiza la visibilidad del televisor en cada frame
+  if (televisorImagen && televisorVideo) {
+    televisorImagen.visible = !usandoVideo;
+    televisorVideo.visible = usandoVideo;
+  }
 
-  // Llamado al renderizador
   renderizador.render(escena, camara);
 }
 animar();
