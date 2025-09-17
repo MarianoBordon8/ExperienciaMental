@@ -186,8 +186,6 @@ posicionesSillas.forEach((sillaPos, index) => {
   );
 });
 
-
-
 // Cargar pizarra en la pared
 loader.load(
   './assets/models/pizarra/pizarra.gltf',  // <-- ruta a tu modelo descargado
@@ -211,8 +209,118 @@ loader.load(
   }
 );
 
+/*
+// Agregar un "televisor" (plano con textura) frente a la pizarra
+const loaderImg = new THREE.TextureLoader();
+loaderImg.load('./assets/images/pizarra.png', function(textura) {
+  // Crea un plano con la textura de la imagen
+  const ancho = 6;
+  const alto = 2.5;
+  const geometry = new THREE.BoxGeometry(ancho, alto, 0.1); // Cubo plano
+  const materiales = [
+    new THREE.MeshStandardMaterial({ color: 0x222222 }), // derecha
+    new THREE.MeshStandardMaterial({ color: 0x222222 }), // izquierda
+    new THREE.MeshStandardMaterial({ color: 0x222222 }), // arriba
+    new THREE.MeshStandardMaterial({ color: 0x222222 }), // abajo
+    new THREE.MeshStandardMaterial({ map: textura }),     // frente (pantalla)
+    new THREE.MeshStandardMaterial({ color: 0x111111 })  // atrás
+  ];
+  const televisor = new THREE.Mesh(geometry, materiales);
 
+  // Posiciona el televisor frente a la pizarra
+  televisor.position.set(0, 1.8, 7.5); // Ajusta Z para que quede frente a la pizarra
+  televisor.rotation.y = Math.PI; // Que mire hacia el aula
 
+  escena.add(televisor);
+});
+*/
+
+// --- TELEVISOR: imagen y video intercambiables ---
+
+// Variables globales para el televisor
+let televisorImagen = null;
+let televisorVideo = null;
+let usandoVideo = false;
+
+// Crear televisor con imagen (por defecto visible)
+const loaderImg = new THREE.TextureLoader();
+loaderImg.load('./assets/images/pizarra.png', function(textura) {
+  const ancho = 6;
+  const alto = 2.5;
+  const geometry = new THREE.BoxGeometry(ancho, alto, 0.1);
+  const materiales = [
+    new THREE.MeshStandardMaterial({ color: 0x222222 }), // derecha
+    new THREE.MeshStandardMaterial({ color: 0x222222 }), // izquierda
+    new THREE.MeshStandardMaterial({ color: 0x222222 }), // arriba
+    new THREE.MeshStandardMaterial({ color: 0x222222 }), // abajo
+    new THREE.MeshStandardMaterial({ map: textura }),     // frente (pantalla)
+    new THREE.MeshStandardMaterial({ color: 0x111111 })  // atrás
+  ];
+  televisorImagen = new THREE.Mesh(geometry, materiales);
+  televisorImagen.position.set(0, 1.8, 7.5);
+  televisorImagen.rotation.y = Math.PI;
+  escena.add(televisorImagen);
+});
+
+// Crear televisor con video (inicialmente invisible)
+const video = document.createElement('video');
+video.src = 'assets/videos/bienvenidos.mp4';
+video.loop = true;
+video.muted = true;
+video.autoplay = true;
+video.playsInline = true;
+video.style.display = 'none';
+document.body.appendChild(video);
+
+video.addEventListener('canplay', function() {
+  const videoTextura = new THREE.VideoTexture(video);
+  videoTextura.minFilter = THREE.LinearFilter;
+  videoTextura.magFilter = THREE.LinearFilter;
+  videoTextura.format = THREE.RGBFormat;
+
+  const ancho = 6;
+  const alto = 2.5;
+  const geometry = new THREE.BoxGeometry(ancho, alto, 0.1);
+  const materiales = [
+    new THREE.MeshStandardMaterial({ color: 0x222222 }), // derecha
+    new THREE.MeshStandardMaterial({ color: 0x222222 }), // izquierda
+    new THREE.MeshStandardMaterial({ color: 0x222222 }), // arriba
+    new THREE.MeshStandardMaterial({ color: 0x222222 }), // abajo
+    new THREE.MeshStandardMaterial({ map: videoTextura }), // frente (pantalla)
+    new THREE.MeshStandardMaterial({ color: 0x111111 })  // atrás
+  ];
+  televisorVideo = new THREE.Mesh(geometry, materiales);
+  televisorVideo.position.set(0, 1.8, 7.5);
+  televisorVideo.rotation.y = Math.PI;
+  televisorVideo.visible = false; // Oculto al inicio
+  escena.add(televisorVideo);
+
+  // Iniciar el video si no se reproduce automáticamente
+  if (video.paused) {
+    video.play();
+  }
+});
+
+// Función para alternar entre imagen y video
+function alternarTelevisor() {
+  usandoVideo = !usandoVideo;
+  if (televisorImagen && televisorVideo) {
+    televisorImagen.visible = !usandoVideo;
+    televisorVideo.visible = usandoVideo;
+    if (usandoVideo) {
+      video.play();
+    } else {
+      video.pause();
+    }
+  }
+}
+
+// Evento para alternar con la tecla "C"
+window.addEventListener('keydown', function(e) {
+  if (e.code === 'KeyC') {
+    alternarTelevisor();
+  }
+});
 
 // Cargar ventana en la pared izquierda
 loader.load(
@@ -285,7 +393,6 @@ loader.load(
 );
 
 
-
 // Agregar una luz espacial (luz ambiental)
 const luzAmbiente = new THREE.AmbientLight(0xffffff, 1.1); // Luz suave general
 escena.add(luzAmbiente);
@@ -342,9 +449,10 @@ window.addEventListener('keyup', function(e) {
 let clock = new THREE.Clock();
 function animar() {
   requestAnimationFrame(animar);
-  
-  
+
+
   // Llamado al renderizador
   renderizador.render(escena, camara);
 }
 animar();
+
