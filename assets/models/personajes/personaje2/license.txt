@@ -1,0 +1,8 @@
+Model Information:
+* title:	Businessman Character [Ankit] Rigged
+* source:	https://sketchfab.com/3d-models/businessman-character-ankit-rigged-99d48204e75d4c63b432f37b73bddc9f
+* author:	ankitanimationstudio (https://sketchfab.com/ankitanimationstudio)
+
+Model License:
+* license type:	SKETCHFAB Standard (https://sketchfab.com/licenses)
+* requirements:	Under basic restrictions, use worldwide, on all types of media, commercially or not, and in all types of derivative works

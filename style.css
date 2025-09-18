@@ -1,21 +1,21 @@
-body {
+/* body {
   margin: 0;
   overflow: hidden;
-}
-/* .progress-bar-container{
+} */
+.progress-bar-container {
   position: absolute;
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
   width: 100%;
   height: 100%;
-  background-color: rgba(0,0,0,0.8);
+  background-color: rgba(0, 0, 0, 0.8);
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;  
+  align-items: center;
 }
-#progress-bar{
+#progress-bar {
   width: 30%;
   margin-top: 0.5%;
   height: 2%;
@@ -23,9 +23,8 @@ body {
 label {
   color: white;
   font-size: 2rem;
-} 
-de todas formas ni se usa esto creo   
-*/
-canvas {
-  display: block;
 }
+
+/* canvas {
+  display: block;
+} */

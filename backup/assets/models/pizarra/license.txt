@@ -1,0 +1,8 @@
+Model Information:
+* title:	Realistic Blackboard
+* source:	https://sketchfab.com/3d-models/realistic-blackboard-1fcaf45adf91486c94988080742ebdc5
+* author:	ali98hussain (https://sketchfab.com/ali98hussain)
+
+Model License:
+* license type:	SKETCHFAB Standard (https://sketchfab.com/licenses)
+* requirements:	Under basic restrictions, use worldwide, on all types of media, commercially or not, and in all types of derivative works

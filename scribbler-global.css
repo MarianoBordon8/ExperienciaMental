@@ -1,32 +1,33 @@
 /* css variables*/
 :root {
-  --primary-color: #432E30;
-  --primary-color-light: #8E7474;
-  --accent-color: #FE6A6B;
-  --accent-color-light: #FFE4E4;
-  --accent-color-dark: #B94B4C;
-  --white-color: #FAFBFC;
-  --light-gray-color: #C6CBD1;
-  --medium-gray-color: #959DA5;
-  --dark-gray-color: #444D56; 
+  --primary-color: #432e30;
+  --primary-color-light: #8e7474;
+  --accent-color: #fe6a6b;
+  --accent-color-light: #ffe4e4;
+  --accent-color-dark: #b94b4c;
+  --white-color: #fafbfc;
+  --light-gray-color: #c6cbd1;
+  --medium-gray-color: #959da5;
+  --dark-gray-color: #444d56;
   --bg-color: #b3b3b3;
-  --code-bg-color: #F0E8E8;
+  --code-bg-color: #f0e8e8;
 }
 
 /* normalized */
 body {
   padding: 0;
   margin: 0;
-  font-family: 'Nunito Sans', sans-serif;
+  font-family: "Nunito Sans", sans-serif;
   background-color: var(--bg-color);
 }
 
 p {
   font-weight: 300;
-  color: #4A4A4A;
+  color: #4a4a4a;
 }
 
-a, a:hover {
+a,
+a:hover {
   text-decoration: none;
   color: var(--primary-color);
 }
@@ -91,7 +92,8 @@ hr {
 /* code */
 .code {
   border-radius: 3px;
-  font-family: Space Mono, SFMono-Regular, Menlo,Monaco, Consolas, Liberation Mono, Courier New, monospace;
+  font-family: Space Mono, SFMono-Regular, Menlo, Monaco, Consolas,
+    Liberation Mono, Courier New, monospace;
   background: var(--bg-color);
   border: 1px solid var(--code-bg-color);
   color: var(--primary-color-light);
@@ -115,7 +117,7 @@ hr {
   position: relative;
   text-decoration: none;
   border: 0;
-  transition: all .3s ease-out;
+  transition: all 0.3s ease-out;
 }
 
 .button--primary:after {
@@ -172,7 +174,7 @@ hr {
 /* menu */
 nav {
   display: grid;
-  grid-template-columns: 70px auto;
+  grid-template-columns: 120px auto;
 }
 
 .menu {
@@ -190,7 +192,7 @@ nav {
 .toggle span,
 .toggle span:before,
 .toggle span:after {
-  content: '';
+  content: "";
   position: absolute;
   height: 2px;
   width: 18px;
@@ -210,7 +212,7 @@ nav {
   bottom: -6px;
 }
 
-.toggle.open span{
+.toggle.open span {
   background-color: transparent;
 }
 
@@ -240,11 +242,12 @@ nav {
 table {
   border-collapse: collapse;
   width: 100%;
-  transition: color .3s ease-out;
+  transition: color 0.3s ease-out;
   margin-bottom: 2rem;
 }
 
-table td, table th {
+table td,
+table th {
   border: 1px solid var(--code-bg-color);
   padding: 0.8rem;
   font-weight: 300;
@@ -267,7 +270,7 @@ table td:first-child {
     grid-template-columns: 70px auto;
   }
 
-  .menu__item{
+  .menu__item {
     display: none;
   }
 
@@ -306,9 +309,9 @@ table td:first-child {
 @keyframes fadeUp {
   0% {
     opacity: 0;
-    transform: translate3d(0,30px,0);
+    transform: translate3d(0, 30px, 0);
   }
   100% {
-    transform: translate3d(0,0,0);
+    transform: translate3d(0, 0, 0);
   }
 }

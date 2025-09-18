@@ -1,8 +1,12 @@
 /* nav specialized to landing page */
 .logo {
-  background: url('UTN_LOGO_BLANCO_transparente.png') no-repeat;
-  background-size: contain;
+  background: url("utn-logo.png") no-repeat;
+  background-size: cover;
   margin: 1rem 0 0 1rem;
+}
+
+body.no-scroll {
+  overflow: hidden;
 }
 
 nav {
@@ -26,7 +30,7 @@ nav {
 }
 
 .pagina-elejir-opcion.hidden {
-    display: none;
+  display: none;
 }
 
 .threejsCanvas {
@@ -36,7 +40,6 @@ nav {
 .threejsCanvas.visible {
   display: block;
 }
-
 
 .hero__terminal {
   width: 60%;
@@ -181,7 +184,9 @@ nav {
   .tab__container .code {
     margin-top: 2rem;
   }
-  .feature, .keybinding, .changelog__item {
+  .feature,
+  .keybinding,
+  .changelog__item {
     flex-direction: column;
   }
   .feature__item {

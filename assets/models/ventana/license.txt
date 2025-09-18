@@ -1,0 +1,8 @@
+Model Information:
+* title:	Window Assembly (Long Wall) v2
+* source:	https://sketchfab.com/3d-models/window-assembly-long-wall-v2-038b59a49e90461baf74e6a200037d60
+* author:	tprevis (https://sketchfab.com/tprevis)
+
+Model License:
+* license type:	SKETCHFAB Standard (https://sketchfab.com/licenses)
+* requirements:	Under basic restrictions, use worldwide, on all types of media, commercially or not, and in all types of derivative works
