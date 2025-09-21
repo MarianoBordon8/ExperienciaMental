@@ -5,3 +5,60 @@ body {
 canvas {
   display: block;
 }
+
+/* 🔹 1. Vibración / Temblor */
+.dislexia1 {
+  display: inline-block;
+  animation: vibrar 0.15s infinite alternate;
+}
+
+@keyframes vibrar {
+  from { transform: translate(0px, 0px); }
+  to   { transform: translate(2px, -1px); }
+}
+
+/* 🔹 2. Desenfoque intermitente */
+.dislexia2 {
+  display: inline-block;
+  animation: desenfoque 1s infinite alternate;
+}
+
+@keyframes desenfoque {
+  0%   { filter: blur(0px); }
+  50%  { filter: blur(2px); }
+  100% { filter: blur(0px); }
+}
+
+/* 🔹 3. Desvanecerse (fade in/out) */
+.dislexia3 {
+  display: inline-block;
+  animation: desaparecer 2s infinite alternate;
+}
+
+@keyframes desaparecer {
+  0%   { opacity: 1; }
+  50%  { opacity: 0.2; }
+  100% { opacity: 1; }
+}
+
+/* 🔹 4. Rotación ligera */
+.dislexia4 {
+  display: inline-block;
+  animation: girar 1s infinite alternate;
+}
+
+@keyframes girar {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(8deg); }
+}
+
+/* 🔹 5. Subir y bajar (wave) */
+.dislexia5 {
+  display: inline-block;
+  animation: wave 0.6s infinite ease-in-out alternate;
+}
+
+@keyframes wave {
+  from { transform: translateY(0px); }
+  to   { transform: translateY(-5px); }
+}
