@@ -1,87 +1,81 @@
-// Variables globales para el televisor
-let televisorImagen = null;
-let televisorVideo = null;
-let usandoVideo = false;
-let video = null;
+// codigos/televisor.js
+let pantalla = null;      // plano donde mapeamos imagen o video
+let imgTex   = null;      // textura de pizarra.png
+let videoEl  = null;      // <video>
+let vTex     = null;      // VideoTexture
+let videoOK  = false;     // canplay listo
+let dislexia = false;     // false = imagen (OFF), true = video (ON)
 
 function crearTelevisor(escena) {
-  // Crear televisor con imagen (por defecto visible)
-  const loaderImg = new THREE.TextureLoader();
-  loaderImg.load('./assets/images/pizarra.png', function(textura) {
-    const ancho = 6;
-    const alto = 2.5;
-    const geometry = new THREE.BoxGeometry(ancho, alto, 0.1);
-    const materiales = [
-      new THREE.MeshStandardMaterial({ color: 0x222222 }), // derecha
-      new THREE.MeshStandardMaterial({ color: 0x222222 }), // izquierda
-      new THREE.MeshStandardMaterial({ color: 0x222222 }), // arriba
-      new THREE.MeshStandardMaterial({ color: 0x222222 }), // abajo
-      new THREE.MeshStandardMaterial({ map: textura }),     // frente (pantalla)
-      new THREE.MeshStandardMaterial({ color: 0x111111 })  // atrás
-    ];
-    televisorImagen = new THREE.Mesh(geometry, materiales);
-    televisorImagen.position.set(0, 1.8, 7.5);
-    televisorImagen.rotation.y = Math.PI;
-    escena.add(televisorImagen);
+  // --- Plano "pantalla" pegado a tu pizarra existente ---
+  // (Tu pizarra glTF está en (0,2,9.9) mirando hacia -Z; ponemos el plano apenas delante)
+  const POS  = new THREE.Vector3(0, 2.0, 9.84); // acercalo/lejos si hace falta
+  const ROTY = Math.PI;                         // mirando al aula
+  const SIZE_W = 5.6;                           // ajustá al tamaño visible de tu pizarra
+  const SIZE_H = 2.2;
+
+  const geo = new THREE.PlaneGeometry(SIZE_W, SIZE_H);
+  const mat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: false });
+  pantalla = new THREE.Mesh(geo, mat);
+  pantalla.position.copy(POS);
+  pantalla.rotation.y = ROTY;
+  escena.add(pantalla);
+
+  // --- Imagen por defecto (OFF) ---
+  new THREE.TextureLoader().load('./assets/images/pizarra.png', (tex) => {
+    // si tu versión de THREE soporta colorSpace:
+    if ('colorSpace' in tex) tex.colorSpace = THREE.SRGBColorSpace;
+    imgTex = tex;
+    if (!dislexia) {
+      pantalla.material.map = imgTex;
+      pantalla.material.needsUpdate = true;
+    }
   });
 
-  // Crear televisor con video (inicialmente invisible)
-  video = document.createElement('video');
-  video.src = 'assets/videos/bienvenidos.mp4';
-  video.loop = true;
-  video.muted = true;
-  video.autoplay = true;
-  video.playsInline = true;
-  video.style.display = 'none';
-  document.body.appendChild(video);
+  // --- Video (ON) ---
+  videoEl = document.createElement('video');
+  videoEl.src = 'assets/videos/bienvenidos.mp4';
+  videoEl.loop = true;
+  videoEl.muted = true;       // necesario para autoplay
+  videoEl.autoplay = true;
+  videoEl.preload = 'auto';
+  videoEl.playsInline = true;
+  videoEl.style.display = 'none';
+  document.body.appendChild(videoEl);
 
-  video.addEventListener('canplay', function() {
-    const videoTextura = new THREE.VideoTexture(video);
-    videoTextura.minFilter = THREE.LinearFilter;
-    videoTextura.magFilter = THREE.LinearFilter;
-    videoTextura.format = THREE.RGBFormat;
+  videoEl.addEventListener('canplay', () => {
+    vTex = new THREE.VideoTexture(videoEl);
+    vTex.minFilter = THREE.LinearFilter;
+    vTex.magFilter = THREE.LinearFilter;
+    if ('colorSpace' in vTex) vTex.colorSpace = THREE.SRGBColorSpace;
 
-    const ancho = 6;
-    const alto = 2.5;
-    const geometry = new THREE.BoxGeometry(ancho, alto, 0.1);
-    const materiales = [
-      new THREE.MeshStandardMaterial({ color: 0x222222 }), // derecha
-      new THREE.MeshStandardMaterial({ color: 0x222222 }), // izquierda
-      new THREE.MeshStandardMaterial({ color: 0x222222 }), // arriba
-      new THREE.MeshStandardMaterial({ color: 0x222222 }), // abajo
-      new THREE.MeshStandardMaterial({ map: videoTextura }), // frente (pantalla)
-      new THREE.MeshStandardMaterial({ color: 0x111111 })  // atrás
-    ];
-    televisorVideo = new THREE.Mesh(geometry, materiales);
-    televisorVideo.position.set(0, 1.8, 7.5);
-    televisorVideo.rotation.y = Math.PI;
-    televisorVideo.visible = false; // Oculto al inicio
-    escena.add(televisorVideo);
-
-    // Asegura que el video esté siempre en reproducción
-    if (video.paused) {
-      video.play();
+    videoOK = true;
+    // si el modo estaba en ON cuando cargó, aplicá video
+    if (dislexia) {
+      try { videoEl.play(); } catch {}
+      pantalla.material.map = vTex;
+      pantalla.material.needsUpdate = true;
     }
   });
 
   return {
-    televisorImagen,
-    televisorVideo,
-    usandoVideo,
-    video,
+    // alterna imagen <-> video. NO pausa ni resetea nada.
     alternarTelevisor: () => {
-      usandoVideo = !usandoVideo;
-      if (usandoVideo && video.paused) {
-        video.play();
+      dislexia = !dislexia;
+      if (dislexia && videoOK) {
+        // mostrar video
+        try { videoEl.play(); } catch {}
+        pantalla.material.map = vTex;
+      } else {
+        // mostrar imagen (si todavía no cargó, queda sin map hasta que cargue)
+        pantalla.material.map = imgTex || null;
       }
+      pantalla.material.needsUpdate = true;
+      return true;
     },
-    actualizarVisibilidad: () => {
-      if (televisorImagen && televisorVideo) {
-        televisorImagen.visible = !usandoVideo;
-        televisorVideo.visible = usandoVideo;
-      }
-    },
-    getUsandoVideo: () => usandoVideo
+    // por compatibilidad con tu código existente
+    actualizarVisibilidad: () => { /* ya no hace falta; el swap es por textura */ },
+    getUsandoVideo: () => dislexia
   };
 }
 
