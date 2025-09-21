@@ -1,15 +1,13 @@
+// codigos/movimientoCamara.js
 function crearMovimientoCamara(camara, renderizador) {
-  // Variables para controles de cámara
+  // -------- Rotación con mouse (sin movimiento de posición) --------
   let isMouseDown = false;
-  let lastX = 0;
-  let lastY = 0;
+  let lastX = 0, lastY = 0;
   let yaw = 0;   // giro horizontal
   let pitch = 0; // giro vertical
 
-  // Variables para movimiento con teclado
-  let velocidad = 0.1;
-  let direccion = new THREE.Vector3();
-  let teclas = {};
+  // tween actual (si existe) para poder cancelarlo
+  let tweenState = null;
 
   function actualizarCamara() {
     camara.rotation.order = "YXZ";
@@ -17,52 +15,90 @@ function crearMovimientoCamara(camara, renderizador) {
     camara.rotation.x = pitch;
   }
 
-  // Eventos del mouse para rotar la cámara
-  renderizador.domElement.addEventListener('mousedown', function(e) {
+  // Eventos del mouse para mirar
+  renderizador.domElement.addEventListener('mousedown', (e) => {
     isMouseDown = true;
     lastX = e.clientX;
     lastY = e.clientY;
   });
-
-  window.addEventListener('mouseup', function() {
-    isMouseDown = false;
-  });
-
-  window.addEventListener('mousemove', function(e) {
+  window.addEventListener('mouseup', () => { isMouseDown = false; });
+  window.addEventListener('mousemove', (e) => {
     if (!isMouseDown) return;
-    const deltaX = e.clientX - lastX;
-    const deltaY = e.clientY - lastY;
+    const dx = e.clientX - lastX;
+    const dy = e.clientY - lastY;
     lastX = e.clientX;
     lastY = e.clientY;
-    yaw -= deltaX * 0.005;
-    pitch -= deltaY * 0.005;
-    // Limita el pitch para evitar que la cámara se voltee
+
+    yaw   -= dx * 0.005;
+    pitch -= dy * 0.005;
     pitch = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, pitch));
     actualizarCamara();
   });
 
-  // Detectar teclas presionadas para movimiento
-  window.addEventListener('keydown', function(e) {
-    teclas[e.code] = true;
-  });
+  // Helper: orientar la cámara inmediatamente a un punto del mundo
+  function lookAt(targetVec3) {
+    const dir = new THREE.Vector3().subVectors(targetVec3, camara.position).normalize();
+    yaw   = Math.atan2(dir.x, dir.z);
+    pitch = Math.atan2(-dir.y, Math.hypot(dir.x, dir.z));
+    actualizarCamara();
+  }
 
-  window.addEventListener('keyup', function(e) {
-    teclas[e.code] = false;
-  });
+  // Helper: tween suave hacia un punto del mundo
+  function smoothLookAt(targetVec3, durMs = 900, onDone) {
+    // cancelar tween anterior si existiera
+    if (tweenState) tweenState.cancelled = true;
 
-  // Retornar las variables y funciones que necesita el main
+    // objetivo
+    const dir = new THREE.Vector3().subVectors(targetVec3, camara.position).normalize();
+    const targetYaw   = Math.atan2(dir.x, dir.z);
+    const targetPitch = Math.atan2(-dir.y, Math.hypot(dir.x, dir.z));
+
+    const startYaw = yaw;
+    const startPitch = pitch;
+
+    // ajustar delta de yaw para ir por el camino más corto
+    const wrap = (a) => {
+      while (a >  Math.PI) a -= 2 * Math.PI;
+      while (a < -Math.PI) a += 2 * Math.PI;
+      return a;
+    };
+    const deltaYaw = wrap(targetYaw - startYaw);
+    const deltaPitch = targetPitch - startPitch;
+
+    const state = { cancelled: false };
+    tweenState = state;
+
+    const t0 = performance.now();
+    const easeInOut = (t) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
+
+    function step(now) {
+      if (state.cancelled) return;
+      const t = Math.min(1, (now - t0) / durMs);
+      const e = easeInOut(t);
+
+      yaw   = startYaw   + deltaYaw   * e;
+      pitch = startPitch + deltaPitch * e;
+      pitch = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, pitch));
+      actualizarCamara();
+
+      if (t < 1) {
+        requestAnimationFrame(step);
+      } else {
+        tweenState = null;
+        if (onDone) onDone();
+      }
+    }
+    requestAnimationFrame(step);
+  }
+
   return {
     actualizarCamara,
-    yaw,
-    pitch,
-    velocidad,
-    direccion,
-    teclas,
-    // Getters para acceder a las variables desde fuera
-    getYaw: () => yaw,
+    getYaw:   () => yaw,
     getPitch: () => pitch,
-    setYaw: (valor) => { yaw = valor; },
-    setPitch: (valor) => { pitch = valor; }
+    setYaw:   (v) => { yaw = v; actualizarCamara(); },
+    setPitch: (v) => { pitch = v; actualizarCamara(); },
+    lookAt,
+    smoothLookAt
   };
 }
 
