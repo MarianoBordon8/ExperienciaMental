@@ -13,8 +13,12 @@ canvas {
 }
 
 @keyframes vibrar {
-  from { transform: translate(0px, 0px); }
-  to   { transform: translate(2px, -1px); }
+  from {
+    transform: translate(0px, 0px);
+  }
+  to {
+    transform: translate(2px, -1px);
+  }
 }
 
 /* 🔹 2. Desenfoque intermitente */
@@ -24,9 +28,15 @@ canvas {
 }
 
 @keyframes desenfoque {
-  0%   { filter: blur(0px); }
-  50%  { filter: blur(2px); }
-  100% { filter: blur(0px); }
+  0% {
+    filter: blur(0px);
+  }
+  50% {
+    filter: blur(2px);
+  }
+  100% {
+    filter: blur(0px);
+  }
 }
 
 /* 🔹 3. Desvanecerse (fade in/out) */
@@ -36,9 +46,15 @@ canvas {
 }
 
 @keyframes desaparecer {
-  0%   { opacity: 1; }
-  50%  { opacity: 0.2; }
-  100% { opacity: 1; }
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.2;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
 /* 🔹 4. Rotación ligera */
@@ -48,8 +64,12 @@ canvas {
 }
 
 @keyframes girar {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(8deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(8deg);
+  }
 }
 
 /* 🔹 5. Subir y bajar (wave) */
@@ -59,6 +79,33 @@ canvas {
 }
 
 @keyframes wave {
-  from { transform: translateY(0px); }
-  to   { transform: translateY(-5px); }
+  from {
+    transform: translateY(0px);
+  }
+  to {
+    transform: translateY(-5px);
+  }
+}
+
+.progress-bar-container {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+#progress-bar {
+  width: 30%;
+  margin-top: 0.5%;
+  height: 2%;
+}
+label[for="progress-bar"] {
+  color: rgb(255, 255, 255);
+  font-size: 2rem;
 }

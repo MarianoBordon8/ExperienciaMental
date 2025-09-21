@@ -1,0 +1,66 @@
+import { crearObjetos } from "./objetos.js";
+import { crearCartelInstrucciones } from "./cartelInstrucciones.js";
+import { crearHabitacion } from "./habitacion.js";
+import { crearTelevisor } from "./televisor.js";
+import { crearExamen } from "./examen.js";
+import { manejarEventosTeclado } from "./eventosTeclado.js";
+import { crearMovimientoCamara } from "./movimientoCamara.js";
+
+// main.js
+function CrearCanvas(idOpcionPersonaje) {
+  console.log(idOpcionPersonaje);
+
+  // Crear la escena
+  const escena = new THREE.Scene();
+  escena.background = new THREE.Color("#48bfeb"); // Azul
+
+  // ----- Entorno base -----
+  crearHabitacion(escena);
+  crearObjetos(escena);
+  crearCartelInstrucciones();
+
+  const televisor = crearTelevisor(escena);
+  const examen = crearExamen(escena);
+
+  // Cámara (alumno fijo en su banco)
+  const fov = 75,
+    aspect = window.innerWidth / window.innerHeight,
+    near = 0.1,
+    far = 1000;
+  const camara = new THREE.PerspectiveCamera(fov, aspect, near, far);
+  camara.position.set(-2.5, 1, -1);
+  camara.rotation.y = Math.PI; // hacia el frente del aula
+
+  // Renderizador
+  const renderizador = new THREE.WebGLRenderer({
+    canvas: document.querySelector("#miCanvas"),
+    antialias: true,
+  });
+  renderizador.setSize(window.innerWidth, window.innerHeight);
+
+  // Luz ambiental
+  const luzAmbiente = new THREE.AmbientLight(0xffffff, 1.1);
+  escena.add(luzAmbiente);
+
+  // Mirada (sólo rotación, sin desplazamiento)
+  const movimiento = crearMovimientoCamara(camara, renderizador);
+
+  // Teclado (C = pizarrón, P = examen)
+  manejarEventosTeclado(camara, televisor, examen, movimiento);
+
+  // Animación
+  function animar() {
+    requestAnimationFrame(animar);
+    televisor.actualizarVisibilidad();
+    renderizador.render(escena, camara);
+  }
+  animar();
+  // Responsive
+  window.addEventListener("resize", () => {
+    camara.aspect = window.innerWidth / window.innerHeight;
+    camara.updateProjectionMatrix();
+    renderizador.setSize(window.innerWidth, window.innerHeight);
+  });
+}
+
+export { CrearCanvas };

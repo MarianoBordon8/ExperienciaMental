@@ -1,57 +1,110 @@
-// main.js
-// Crear la escena
-const escena = new THREE.Scene();
-escena.background = new THREE.Color("#48bfeb"); // Azul
+import { CrearCanvas } from "./codigos/canvas.js";
 
-import { crearObjetos } from './codigos/objetos.js';
-import { crearCartelInstrucciones } from './codigos/cartelInstrucciones.js';
-import { crearHabitacion } from './codigos/habitacion.js';
-import { crearTelevisor } from './codigos/televisor.js';
-import { crearExamen } from './codigos/examen.js';
-import { manejarEventosTeclado } from './codigos/eventosTeclado.js';
-import { crearMovimientoCamara } from './codigos/movimientoCamara.js';
+// utilities
+var get = function (selector, scope) {
+  scope = scope ? scope : document;
+  return scope.querySelector(selector);
+};
 
-// ----- Entorno base -----
-crearHabitacion(escena);
-crearObjetos(escena);
-crearCartelInstrucciones();
+var getAll = function (selector, scope) {
+  scope = scope ? scope : document;
+  return scope.querySelectorAll(selector);
+};
 
-const televisor = crearTelevisor(escena);
-const examen    = crearExamen(escena);
+// Funcion para escribir las letras como si fuera una terminal
+if (document.getElementsByClassName("demo").length > 0) {
+  var i = 0;
+  var txt = `
+                        Diseñar un entorno virtual de aula, en primera persona, que permita comprender distintas maneras de percibir y procesar una clase y abrir conversación sobre ajustes razonables e inclusión.
+                        Propuesta educativa, no clínica.`;
+  var speed = 60;
 
-// Cámara (alumno fijo en su banco)
-const fov = 75, aspect = window.innerWidth / window.innerHeight, near = 0.1, far = 1000;
-const camara = new THREE.PerspectiveCamera(fov, aspect, near, far);
-camara.position.set(-2.5, 1, -1);
-camara.rotation.y = Math.PI; // hacia el frente del aula
+  function typeItOut() {
+    if (i < txt.length) {
+      document.getElementsByClassName("demo")[0].innerHTML += txt.charAt(i);
+      i++;
+      setTimeout(typeItOut, speed);
+    }
+  }
 
-// Renderizador
-const renderizador = new THREE.WebGLRenderer({
-  canvas: document.querySelector("#miCanvas"),
-  antialias: true
-});
-renderizador.setSize(window.innerWidth, window.innerHeight);
-
-// Luz ambiental
-const luzAmbiente = new THREE.AmbientLight(0xffffff, 1.1);
-escena.add(luzAmbiente);
-
-// Mirada (sólo rotación, sin desplazamiento)
-const movimiento = crearMovimientoCamara(camara, renderizador);
-
-// Teclado (C = pizarrón, P = examen)
-manejarEventosTeclado(camara, televisor, examen, movimiento);
-
-// Animación
-function animar() {
-  requestAnimationFrame(animar);
-  televisor.actualizarVisibilidad();
-  renderizador.render(escena, camara);
+  setTimeout(typeItOut, 100);
 }
-animar();
-// Responsive
-window.addEventListener('resize', () => {
-  camara.aspect = window.innerWidth / window.innerHeight;
-  camara.updateProjectionMatrix();
-  renderizador.setSize(window.innerWidth, window.innerHeight);
+
+// Seleccion del personaje
+window.addEventListener("load", function () {
+  // get all tab_containers in the document
+  var tabContainers = getAll(".tab__container");
+
+  // bind click event to each tab container
+  for (var i = 0; i < tabContainers.length; i++) {
+    get(".tab__menu", tabContainers[i]).addEventListener("click", tabClick);
+  }
+
+  // each click event is scoped to the tab_container
+  function tabClick(event) {
+    var scope = event.currentTarget.parentNode;
+    var clickedTab = event.target.closest(".tab");
+
+    // Check if the click was on a valid tab.
+    if (!clickedTab) {
+      return; // Exit the function if it wasn't a tab.
+    }
+    var tabs = getAll(".tab", scope);
+    var panes = getAll(".tab__pane", scope);
+    var activePane = get(`.${clickedTab.getAttribute("data-tab")}`, scope);
+
+    // remove all active tab classes
+    for (var i = 0; i < tabs.length; i++) {
+      tabs[i].classList.remove("active");
+    }
+
+    // remove all active pane classes
+    for (var i = 0; i < panes.length; i++) {
+      panes[i].classList.remove("active");
+    }
+
+    // apply active classes on desired tab and pane
+    clickedTab.classList.add("active");
+    activePane.classList.add("active");
+  }
+});
+
+// responsive navigation
+var topNav = get(".menu");
+var icon = get(".toggle");
+
+window.addEventListener("load", function () {
+  function showNav() {
+    if (topNav.className === "menu") {
+      topNav.className += " responsive";
+      icon.className += " open";
+    } else {
+      topNav.className = "menu";
+      icon.classList.remove("open");
+    }
+  }
+  icon.addEventListener("click", showNav);
+});
+// Get all the "Elegir" buttons
+const startGameButtons = document.querySelectorAll(
+  ".tab__pane .button--secondary"
+);
+// Get the wrappers
+const landingPageWrapper = document.querySelector(".pagina-elejir-opcion");
+const gameWrapper = document.querySelector(".threejsCanvas");
+
+// Aca comienza Threejs
+function initializeThreeJSGame(event) {
+  // Esconder la pagina principal y mostrar el canvas
+  landingPageWrapper.style.display = "none";
+  gameWrapper.style.display = "block";
+  document.body.classList.add("no-scroll");
+
+  // Enviar la ID del boton para que despues se pueda elejir el canvas deseado
+  CrearCanvas(event.target.id);
+}
+
+// Attach a click listener to all "Elegir" buttons
+startGameButtons.forEach((button) => {
+  button.addEventListener("click", initializeThreeJSGame); //aca puedo enviar la id del boton por si en el futuro hace falta
 });

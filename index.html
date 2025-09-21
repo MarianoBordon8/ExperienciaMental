@@ -1,18 +1,163 @@
 <!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Primer Cubo con Three.js</title>
-  
-  <link rel="stylesheet" href="style.css" />
-</head>
-<body>
-  <!-- Canvas donde se renderiza la escena -->
-  <canvas id="miCanvas"></canvas>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="description" content="" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Empathy Lab</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css?family=Nunito+Sans:300,400,600,700,800,900"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/railscasts.min.css"
+    />
+    <!-- <link rel="stylesheet" href="scribbler-global.css" /> -->
+    <!-- <link rel="stylesheet" href="scribbler-landing.css" /> -->
+    <link rel="stylesheet" href="main.css" />
+    <link rel="stylesheet" href="style.css" />
 
-  <!-- Código principal con módulos -->
-  <script type="module" src="main.js"></script>
-  <script src="libs/three.min.js"></script> 
-</body>
+    <link rel="author" href="humans.txt" />
+  </head>
+  <body>
+    <div class="pagina-elejir-opcion">
+      <nav>
+        <div class="logo"></div>
+        <ul class="menu">
+          <div class="menu__item toggle"><span></span></div>
+          <li class="menu__item">
+            <a href="No_programamos_esta_pagina_todavia" class="link link--dark"
+              ><i class="fa fa-book"></i> Sobre este Proyecto</a
+            >
+          </li>
+          <li class="menu__item">
+            <a
+              href="https://github.com/MarianoBordon8/ExperienciaMental"
+              class="link link--dark"
+              ><i class="fa fa-github"></i> Github</a
+            >
+          </li>
+        </ul>
+      </nav>
+      <div class="hero">
+        <h1 class="hero__title">Empathy Lab</h1>
+        <p class="hero__description">
+          Una experiencia 3D interactiva que demuestra diferentes de diferentes
+          maneras que siente cada una de las personas
+        </p>
+      </div>
+      <div class="hero__terminal">
+        <pre>
+        <code class="shell-session demo">Nuestro Proposito? </code>
+      </pre>
+      </div>
+      <div class="wrapper">
+        <div class="installation">
+          <h3 class="section__title">Seleccion de personaje</h3>
+          <div class="tab__container">
+            <ul class="tab__menu">
+              <li class="tab active" data-tab="mac">Juan</li>
+              <li class="tab" data-tab="linux">Mario</li>
+              <li class="tab" data-tab="win">Franco</li>
+            </ul>
+
+            <div class="tab__pane active mac">
+              <pre class="nohighlight code">
+Elije esta experiencia (Pequeña descripcion de la experiencia)
+      </pre
+              >
+              <button id="Juan" class="button--secondary">Elegir Juan</button>
+            </div>
+
+            <div class="tab__pane linux">
+              <pre class="nohighlight code">
+Elije esta experiencia, decimos el nombre? que hacemos? se puede cambiar este texto
+      </pre
+              >
+              <button id="Mario" class="button--secondary">Elegir Mario</button>
+            </div>
+
+            <div class="tab__pane win">
+              <pre class="nohighlight code">
+Elije esta experiencia, tiene historia y demas pero solo una linea de texto
+      </pre
+              >
+              <button id="Franco" class="button--secondary">
+                Elegir Franco
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="feature">
+        <div class="feature__item">
+          <h3 class="section__title">Objetivos</h3>
+          <p>
+            Hacer tangible la diversidad de percepciones en clase (texto,
+            sonido, foco atencional, carga sensorial).<br /><br />Ofrecer
+            decisiones y ajustes posibles dentro de la narrativa (p. ej.,
+            reformular consigna, regular estímulos, turnos claros, apoyos
+            visuales/sonoros).<br /><br />Cerrar con reflexión guiada: qué
+            ayudó, qué costó y qué podría cambiar en la práctica docente y entre
+            pares.
+          </p>
+        </div>
+        <div class="feature__item">
+          <h3 class="section__title">Premisa General</h3>
+          <p>
+            “Una clase común”. El/la usuario/a está sentado/a en su banco;
+            escucha una explicación, recibe una consigna y participa con pares.
+            Puede activar modulaciones de percepción (texto, sonido, foco
+            visual) sin etiquetar ni patologizar.
+          </p>
+        </div>
+        <div class="feature__item">
+          <h3 class="section__title">Tono y Ética</h3>
+          <p>
+            Representación respetuosa, con control del/la usuario/a sobre la
+            experiencia y foco en aprender a apoyar más que en “mostrar
+            síntomas”.
+          </p>
+        </div>
+      </div>
+      <div class="keybinding">
+        <ul class="keybinding__detail">
+          <h3 class="keybinding__title">Como Jugar?</h3>
+          <li>
+            Mover Camara
+            <span class="keybinding__label">Click Izquierdo + Mouse</span>
+          </li>
+          <li>
+            Caminar hacia adelante <span class="keybinding__label">W</span>
+          </li>
+          <li>Interactuar <span class="keybinding__label">E</span></li>
+          <li>algo mas? <span class="keybinding__label">alguna tecla</span></li>
+        </ul>
+      </div>
+      <div class="callout">
+        <p>Puedes encontrar mas informacion sobre nosotros aqui</p>
+        <a href="NO_ESTA_PROGRAMADO_TODAVIA" class="button--primary"
+          >Sobre este Proyecto</a
+        >
+      </div>
+      <footer class="footer">
+        Creado por: Nicolas Murua - Mariano Bordon - Santino Chamia.
+      </footer>
+    </div>
+    <div class="threejsCanvas" style="display: none">
+      <!-- Canvas donde se renderiza la escena -->
+      <canvas id="miCanvas"></canvas>
+      <div class="progress-bar-container">
+        <label for="progress-bar">Loading...</label>
+        <progress id="progress-bar" value="0" max="100"></progress>
+      </div>
+    </div>
+    <script type="module" src="main.js"></script>
+    <script src="libs/three.min.js"></script>
+  </body>
 </html>
