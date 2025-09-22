@@ -79,7 +79,7 @@ function crearTelevisor(escena, idOpcionPersonaje) {
       }
       pantalla.material.needsUpdate = true;
     },
-    
+
     // DEPRECATED: Método mantenido por compatibilidad, pero la lógica se movió a dislexia.js
     alternarTelevisor: () => {
       console.warn("alternarTelevisor() está deprecated. Usar el sistema de dislexia.js en su lugar.");
