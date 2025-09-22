@@ -6,7 +6,7 @@ let vTex     = null;      // VideoTexture
 let videoOK  = false;     // canplay listo
 let dislexia = false;     // false = imagen (OFF), true = video (ON)
 
-function crearTelevisor(escena) {
+function crearTelevisor(escena, idOpcionPersonaje) {
   // --- Plano "pantalla" pegado a tu pizarra existente ---
   // (Tu pizarra glTF está en (0,2,9.9) mirando hacia -Z; ponemos el plano apenas delante)
   const POS  = new THREE.Vector3(0, 2.0, 9.84); // acercalo/lejos si hace falta
@@ -32,7 +32,8 @@ function crearTelevisor(escena) {
     }
   });
 
-  // --- Video (ON) ---
+  // --- Video (ON) - Solo se carga si el personaje es Juan ---
+  if (idOpcionPersonaje === "Juan") {
   videoEl = document.createElement('video');
   videoEl.src = 'assets/videos/bienvenidos.mp4';
   videoEl.loop = true;
@@ -57,11 +58,17 @@ function crearTelevisor(escena) {
       pantalla.material.needsUpdate = true;
     }
   });
+  } else {
+    // Para personajes que no sean Juan, no cargar video
+    videoOK = false;
+    videoEl = null;
+    vTex = null;
+  } // Fin del if para Juan
 
   return {
-    // alterna imagen <-> video. NO pausa ni resetea nada.
-    alternarTelevisor: () => {
-      dislexia = !dislexia;
+    // Cambiar modo del televisor (controlado externamente por dislexia.js)
+    cambiarModo: (activarDislexia) => {
+      dislexia = activarDislexia;
       if (dislexia && videoOK) {
         // mostrar video
         try { videoEl.play(); } catch {}
@@ -71,6 +78,25 @@ function crearTelevisor(escena) {
         pantalla.material.map = imgTex || null;
       }
       pantalla.material.needsUpdate = true;
+    },
+    
+    // DEPRECATED: Método mantenido por compatibilidad, pero la lógica se movió a dislexia.js
+    alternarTelevisor: () => {
+      console.warn("alternarTelevisor() está deprecated. Usar el sistema de dislexia.js en su lugar.");
+      // Solo permitir alternar si el personaje es "Juan"
+      if (idOpcionPersonaje === "Juan") {
+        dislexia = !dislexia;
+        if (dislexia && videoOK) {
+          // mostrar video
+          try { videoEl.play(); } catch {}
+          pantalla.material.map = vTex;
+        } else {
+          // mostrar imagen (si todavía no cargó, queda sin map hasta que cargue)
+          pantalla.material.map = imgTex || null;
+        }
+        pantalla.material.needsUpdate = true;
+      }
+      // Si no es Juan, no hacer nada (mantener siempre la imagen)
       return true;
     },
     // por compatibilidad con tu código existente

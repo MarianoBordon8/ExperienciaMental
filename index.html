@@ -150,6 +150,18 @@ Elije esta experiencia, tiene historia y demas pero solo una linea de texto
       </footer>
     </div>
     <div class="threejsCanvas" style="display: none">
+      <!-- Audio de campana escolar -->
+      <audio id="school-bell" preload="auto">
+        <source src="assets/sounds/school-bell-310293.mp3" type="audio/mpeg">
+        Tu navegador no soporta el elemento de audio.
+      </audio>
+      <!-- Pantalla negra durante carga de objetos -->
+      <div id="pantalla-carga" class="pantalla-carga">
+        <div style="color: white; font-size: 24px; text-align: center;">
+          <div>Cargando objetos 3D...</div>
+          <div style="margin-top: 20px; font-size: 18px;">Por favor espera</div>
+        </div>
+      </div>
       <!-- Canvas donde se renderiza la escena -->
       <canvas id="miCanvas"></canvas>
       <div class="progress-bar-container">

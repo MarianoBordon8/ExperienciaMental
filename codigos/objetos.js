@@ -17,6 +17,48 @@ function crearObjetos(escena) {
     console.log("termino");
 
     progressBarConteiner.style.display = "none";
+    
+    // Reproducir sonido de campana escolar cuando terminan de cargar todos los objetos
+    const schoolBell = document.getElementById("school-bell");
+    const pantallaCarga = document.getElementById("pantalla-carga");
+    
+    if (schoolBell && pantallaCarga) {
+      // Cambiar mensaje en la pantalla negra
+      const mensaje = pantallaCarga.querySelector('div > div:first-child');
+      if (mensaje) {
+        mensaje.textContent = "¡Listo! Bienvenido al aula";
+      }
+      
+      // Reproducir sonido de campana
+      schoolBell.play().then(() => {
+        console.log("Reproduciendo campana escolar");
+      }).catch((error) => {
+        console.log("Error al reproducir audio:", error);
+        // Si falla el audio, ocultar pantalla inmediatamente
+        ocultarPantallaCarga();
+      });
+
+      // Esperar a que termine el audio (3 segundos) para ocultar la pantalla
+      schoolBell.addEventListener('ended', ocultarPantallaCarga);
+
+      // Fallback: si por alguna razón el evento 'ended' no se dispara
+      setTimeout(ocultarPantallaCarga, 3500);
+    } else {
+      // Si no se encuentra el audio o la pantalla, ocultar inmediatamente
+      ocultarPantallaCarga();
+    }
+
+    function ocultarPantallaCarga() {
+      if (pantallaCarga && pantallaCarga.classList.contains('visible')) {
+        pantallaCarga.classList.add("fade-out");
+        // Después de la transición completa (1 segundo), ocultar completamente
+        setTimeout(() => {
+          pantallaCarga.classList.remove("visible");
+          pantallaCarga.classList.remove("fade-out");
+          pantallaCarga.style.display = "none"; // Asegurar que se oculte completamente
+        }, 1000);
+      }
+    }
   };
   //   const loader = new GLTFLoader();
 

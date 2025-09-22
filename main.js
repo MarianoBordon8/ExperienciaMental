@@ -100,6 +100,10 @@ function initializeThreeJSGame(event) {
   gameWrapper.style.display = "block";
   document.body.classList.add("no-scroll");
 
+  // Mostrar pantalla negra de carga inmediatamente
+  const pantallaCarga = document.getElementById("pantalla-carga");
+  pantallaCarga.classList.add("visible");
+
   // Enviar la ID del boton para que despues se pueda elejir el canvas deseado
   CrearCanvas(event.target.id);
 }

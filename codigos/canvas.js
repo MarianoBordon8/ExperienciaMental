@@ -5,6 +5,7 @@ import { crearTelevisor } from "./televisor.js";
 import { crearExamen } from "./examen.js";
 import { manejarEventosTeclado } from "./eventosTeclado.js";
 import { crearMovimientoCamara } from "./movimientoCamara.js";
+import { inicializarSistemaDislexia } from "./enfermedades/dislexia.js";
 
 // main.js
 function CrearCanvas(idOpcionPersonaje) {
@@ -18,9 +19,19 @@ function CrearCanvas(idOpcionPersonaje) {
   crearHabitacion(escena);
   crearObjetos(escena);
   crearCartelInstrucciones();
-
-  const televisor = crearTelevisor(escena);
+  const televisor = crearTelevisor(escena, idOpcionPersonaje);
   const examen = crearExamen(escena);
+
+  if (idOpcionPersonaje === "Juan") {
+    // Inicializar el sistema de dislexia con los objetos creados
+    inicializarSistemaDislexia(televisor, examen, idOpcionPersonaje);
+  }else if (idOpcionPersonaje === "Mario") {
+    console.log(idOpcionPersonaje);
+  }else if (idOpcionPersonaje === "Franco") {
+    console.log(idOpcionPersonaje);
+  }else {
+    console.log("No se seleccionó un personaje válido.");
+  }
 
   // Cámara (alumno fijo en su banco)
   const fov = 75,
