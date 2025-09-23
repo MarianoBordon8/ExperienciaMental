@@ -24,7 +24,11 @@ function manejarEventosTeclado(camara, televisor, examen, movimiento, enfermedad
     if (e.code === 'KeyP') {
       movimiento.smoothLookAt(CUADERNO, 1000, () => {
         examen.mostrarExamen();
-        sincronizarExamenConDislexia();
+        
+        // Solo sincronizar con dislexia si Juan está seleccionado
+        if (enfermedad === "dislexia") {
+          sincronizarExamenConDislexia();
+        }
       });
     }
 

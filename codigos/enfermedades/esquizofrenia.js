@@ -5,7 +5,7 @@ let audioContext = null;
 let susurroAudios = []; // Array de elementos de audio
 let susurroSources = []; // Array de sources para cada audio
 let gainNodes = []; // Array de nodos de ganancia individuales para cada audio
-let pannerNode = null;
+let pannerNodes = []; // Array de nodos panner 3D individuales para cada audio
 let isAudioInitialized = false;
 
 // Variables para reproducción automática aleatoria
@@ -16,36 +16,53 @@ const MAX_INTERVAL = 15000; // Máximo 15 segundos
 
 // Array de rutas de los audios de susurro
 const rutasAudios = [
-  'assets/sounds/susurro1.mp3',
-  'assets/sounds/susurro2.mp3',
-  'assets/sounds/susurro3.mp3',
-  'assets/sounds/susurro4.mp3'
+    'assets/sounds/susurro1.mp3',
+    'assets/sounds/susurro2.mp3',
+    'assets/sounds/susurro3.mp3',
+    'assets/sounds/susurro4.mp3',
+    'assets/sounds/risaMujer.mp3'
 ];
 
-// Volúmenes específicos para cada audio (índices 1 y 3 corresponden a audios 2 y 4)
-const volumenes = [0.7, 2.0, 0.7, 2.0]; // Audio 2 y 4 con volumen máximo
+// Volúmenes específicos para cada audio (índices 1 y 3 corresponden a audios 2 y 4, índice 4 para risaMujer)
+const volumenes = [0.7, 2.0, 0.7, 2.0, 1.5]; // Audio 2 y 4 con volumen máximo, risaMujer con volumen alto
 
-// Posiciones estéreo aleatorias
-const posicionesEstereo = [
-  { valor: -1.0, descripcion: "Auricular izquierdo" },
-  { valor: 0.0, descripcion: "Ambos auriculares (centro)" },
-  { valor: 1.0, descripcion: "Auricular derecho" }
+// Posiciones espaciales 3D aleatorias
+const posicionesEspaciales = [
+    { x: -2, y: 0, z: 0, descripcion: "Auricular izquierdo" },
+    { x: 0, y: 0, z: 0, descripcion: "Ambos auriculares (centro)" },
+    { x: 2, y: 0, z: 0, descripcion: "Auricular derecho" },
+    { x: 0, y: 0, z: -3, descripcion: "Detrás del personaje" }
 ];
 
-// Inicializar el sistema de audio estéreo
+// Inicializar el sistema de audio espacial 3D
 function inicializarAudioEsquizofrenia() {
-  try {
-    // Crear contexto de audio
-    audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    
-    // Crear nodo panner compartido para control estéreo
-    pannerNode = audioContext.createStereoPanner();
-    
-    // Configurar el panner en posición inicial (se cambiará dinámicamente)
-    pannerNode.pan.value = 0.0; // Iniciar en centro, se cambiará aleatoriamente
-    
-    // Conectar el panner a la salida
-    pannerNode.connect(audioContext.destination);
+    try {
+        // Crear contexto de audio
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+    // Configurar el listener (oyente) en la posición del personaje
+    const listener = audioContext.listener;
+
+    // Posición del oyente (personaje sentado en el banco)
+    if (listener.positionX) {
+      // Navegadores modernos con parámetros AudioParam
+        listener.positionX.setValueAtTime(0, audioContext.currentTime);
+        listener.positionY.setValueAtTime(0, audioContext.currentTime);
+        listener.positionZ.setValueAtTime(0, audioContext.currentTime);
+
+        // Orientación del oyente (mirando hacia el frente)
+        listener.forwardX.setValueAtTime(0, audioContext.currentTime);
+        listener.forwardY.setValueAtTime(0, audioContext.currentTime);
+        listener.forwardZ.setValueAtTime(-1, audioContext.currentTime);
+
+        listener.upX.setValueAtTime(0, audioContext.currentTime);
+        listener.upY.setValueAtTime(1, audioContext.currentTime);
+        listener.upZ.setValueAtTime(0, audioContext.currentTime);
+    } else {
+      // Navegadores antiguos con métodos deprecated
+      listener.setPosition(0, 0, 0);
+      listener.setOrientation(0, 0, -1, 0, 1, 0);
+    }
     
     // Crear elementos de audio para cada susurro
     rutasAudios.forEach((ruta, index) => {
@@ -54,26 +71,39 @@ function inicializarAudioEsquizofrenia() {
       audio.preload = 'auto';
       audio.loop = false;
       
-      // Crear source y nodo de ganancia individual para este audio
+      // Crear source, nodo de ganancia y panner 3D individual para este audio
       const source = audioContext.createMediaElementSource(audio);
       const gainNode = audioContext.createGain();
+      const pannerNode = audioContext.createPanner();
+      
+      // Configurar el panner 3D
+      pannerNode.panningModel = 'HRTF'; // Modelo de audio espacial más realista
+      pannerNode.distanceModel = 'inverse';
+      pannerNode.refDistance = 1;
+      pannerNode.maxDistance = 10000;
+      pannerNode.rolloffFactor = 1;
+      pannerNode.coneInnerAngle = 360;
+      pannerNode.coneOuterAngle = 0;
+      pannerNode.coneOuterGain = 0;
       
       // Configurar volumen específico para este audio
       gainNode.gain.value = volumenes[index];
       
-      // Conectar la cadena: source -> gain individual -> panner compartido
+      // Conectar la cadena: source -> gain individual -> panner 3D -> destino
       source.connect(gainNode);
       gainNode.connect(pannerNode);
+      pannerNode.connect(audioContext.destination);
       
       susurroAudios.push(audio);
       susurroSources.push(source);
       gainNodes.push(gainNode);
+      pannerNodes.push(pannerNode);
       
       console.log(`Audio ${index + 1} inicializado con volumen: ${volumenes[index]}`);
     });
     
     isAudioInitialized = true;
-    console.log("Sistema de audio estéreo inicializado correctamente con", rutasAudios.length, "susurros");
+    console.log("Sistema de audio espacial 3D inicializado correctamente con", rutasAudios.length, "susurros y", posicionesEspaciales.length, "posiciones espaciales");
     
   } catch (error) {
     console.error("Error al inicializar el sistema de audio:", error);
@@ -81,7 +111,7 @@ function inicializarAudioEsquizofrenia() {
   }
 }
 
-// Reproducir susurro con audio y posición estéreo aleatorios (función interna)
+// Reproducir susurro con audio y posición espacial 3D aleatorios (función interna)
 function reproducirSusurroAleatorio() {
   if (!isAudioInitialized) {
     console.warn("Sistema de audio no inicializado");
@@ -92,16 +122,25 @@ function reproducirSusurroAleatorio() {
   const indiceAleatorio = Math.floor(Math.random() * susurroAudios.length);
   const audioSeleccionado = susurroAudios[indiceAleatorio];
   const volumenActual = volumenes[indiceAleatorio];
+  const pannerSeleccionado = pannerNodes[indiceAleatorio];
   
-  // Seleccionar una posición estéreo aleatoria
-  const indicePosicion = Math.floor(Math.random() * posicionesEstereo.length);
-  const posicionSeleccionada = posicionesEstereo[indicePosicion];
+  // Seleccionar una posición espacial aleatoria
+  const indicePosicion = Math.floor(Math.random() * posicionesEspaciales.length);
+  const posicionSeleccionada = posicionesEspaciales[indicePosicion];
   
-  // Aplicar la nueva posición estéreo
-  pannerNode.pan.value = posicionSeleccionada.valor;
-  
+  // Aplicar la posición espacial 3D al panner correspondiente
+  if (pannerSeleccionado.positionX) {
+    // Navegadores modernos con parámetros AudioParam
+    pannerSeleccionado.positionX.setValueAtTime(posicionSeleccionada.x, audioContext.currentTime);
+    pannerSeleccionado.positionY.setValueAtTime(posicionSeleccionada.y, audioContext.currentTime);
+    pannerSeleccionado.positionZ.setValueAtTime(posicionSeleccionada.z, audioContext.currentTime);
+  } else {
+    // Navegadores antiguos con métodos deprecated
+    pannerSeleccionado.setPosition(posicionSeleccionada.x, posicionSeleccionada.y, posicionSeleccionada.z);
+  }
+
   console.log(`[Auto] Reproduciendo susurro ${indiceAleatorio + 1} (${rutasAudios[indiceAleatorio]}) - Volumen: ${volumenActual} - Posición: ${posicionSeleccionada.descripcion}`);
-  
+
   try {
     // Verificar si el contexto de audio está suspendido (política de navegadores)
     if (audioContext.state === 'suspended') {
@@ -251,6 +290,7 @@ function desactivarSistemaEsquizofrenia() {
   susurroAudios = [];
   susurroSources = [];
   gainNodes = [];
+  pannerNodes = [];
   
   isAudioInitialized = false;
   console.log("Sistema de esquizofrenia desactivado");

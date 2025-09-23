@@ -59,7 +59,7 @@ function dividirTextoAleatorio(texto) {
   return resultado;
 }
 
-// Crear el elemento HTML para el texto (solo el contenedor vacío)
+// Crear el elemento HTML para el texto (con contenido normal por defecto)
 function crearTextoHTML() {
   const contenedorTexto = document.createElement('div');
   contenedorTexto.id = 'textoHoja';
@@ -81,7 +81,7 @@ function crearTextoHTML() {
   contenedorTexto.style.zIndex = '1000';
   contenedorTexto.style.overflowY = 'auto';
 
-  // Contenedor vacío inicialmente
+  // Inicializar con contenido normal por defecto
   contenedorTexto.innerHTML = '';
 
   document.body.appendChild(contenedorTexto);
@@ -344,6 +344,12 @@ function crearExamen(escena) {
     llenarContenidoExamenDislexia,
     cerrarHoja,
     mostrarExamen: () => {
+      // Cargar contenido normal por defecto si el examen está vacío
+      const contenedorTexto = document.getElementById('textoHoja');
+      if (contenedorTexto && contenedorTexto.innerHTML.trim() === '') {
+        llenarContenidoExamen();
+      }
+      
       hojaVisible = true;
       if (hojaCuaderno) hojaCuaderno.visible = true;
       document.getElementById('textoHoja').style.display = 'block';
