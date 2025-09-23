@@ -50,13 +50,17 @@ function crearObjetos(escena) {
 
     function ocultarPantallaCarga() {
       if (pantallaCarga && pantallaCarga.classList.contains('visible')) {
-        pantallaCarga.classList.add("fade-out");
-        // Después de la transición completa (1 segundo), ocultar completamente
-        setTimeout(() => {
-          pantallaCarga.classList.remove("visible");
-          pantallaCarga.classList.remove("fade-out");
-          pantallaCarga.style.display = "none"; // Asegurar que se oculte completamente
-        }, 1000);
+      pantallaCarga.classList.add("fade-out");
+      setTimeout(() => {
+        pantallaCarga.classList.remove("visible");
+        pantallaCarga.classList.remove("fade-out");
+        pantallaCarga.style.display = "none";
+        // 👉 avisamos que la pantalla de carga ya no está
+        window.dispatchEvent(new Event('ui:pantalla-carga-oculta'));
+      }, 1000);
+      } else {
+      // Por si no estaba visible, igual avisamos
+      window.dispatchEvent(new Event('ui:pantalla-carga-oculta'));
       }
     }
   };
