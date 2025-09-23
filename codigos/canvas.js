@@ -6,6 +6,7 @@ import { crearExamen } from "./examen.js";
 import { manejarEventosTeclado } from "./eventosTeclado.js";
 import { crearMovimientoCamara } from "./movimientoCamara.js";
 import { inicializarSistemaDislexia } from "./enfermedades/dislexia.js";
+import { activarSistemaEsquizofrenia } from "./enfermedades/esquizofrenia.js"; // Sistema de audio estéreo
 
 // main.js
 function CrearCanvas(idOpcionPersonaje) {
@@ -14,6 +15,8 @@ function CrearCanvas(idOpcionPersonaje) {
   // Crear la escena
   const escena = new THREE.Scene();
   escena.background = new THREE.Color("#48bfeb"); // Azul
+
+  let enfermedad;
 
   // ----- Entorno base -----
   crearHabitacion(escena);
@@ -24,9 +27,13 @@ function CrearCanvas(idOpcionPersonaje) {
 
   if (idOpcionPersonaje === "Juan") {
     // Inicializar el sistema de dislexia con los objetos creados
+    enfermedad = "dislexia";
     inicializarSistemaDislexia(televisor, examen, idOpcionPersonaje);
   }else if (idOpcionPersonaje === "Mario") {
-    console.log(idOpcionPersonaje);
+    // Activar sistema de esquizofrenia (susurro por auricular derecho con tecla Y)
+    enfermedad = "esquizofrenia";
+    activarSistemaEsquizofrenia();
+    console.log("Sistema de esquizofrenia activado para", idOpcionPersonaje);
   }else if (idOpcionPersonaje === "Franco") {
     console.log(idOpcionPersonaje);
   }else {
@@ -57,7 +64,7 @@ function CrearCanvas(idOpcionPersonaje) {
   const movimiento = crearMovimientoCamara(camara, renderizador);
 
   // Teclado (C = pizarrón, P = examen)
-  manejarEventosTeclado(camara, televisor, examen, movimiento);
+  manejarEventosTeclado(camara, televisor, examen, movimiento, enfermedad);
 
   // Animación
   function animar() {
