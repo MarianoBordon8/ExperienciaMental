@@ -216,10 +216,10 @@ function crearObjetos(escena) {
       const pizarra = gltf.scene;
 
       // Posición: centrada en la pared opuesta
-      pizarra.position.set(0, 2, 9.9); // Z positivo para la pared opuesta
+      pizarra.position.set(0.5, 2, 9.9); // Z positivo para la pared opuesta
 
       // Escalar según necesites
-      pizarra.scale.set(3, 2, 0.1); // ancho x alto x profundidad
+      pizarra.scale.set(2.5, 2, 0.1); // ancho x alto x profundidad
 
       // Rotar 180 grados para que mire hacia el aula
       pizarra.rotation.y = Math.PI;
@@ -286,7 +286,7 @@ function crearObjetos(escena) {
       const profesor = gltf.scene;
 
       // Posición, escala y rotación...
-      profesor.position.set(-5, -2.2, 9);
+      profesor.position.set(-5, -2.2, 8);
       profesor.scale.set(3, 3, 3);
       profesor.rotation.y = Math.PI;
 

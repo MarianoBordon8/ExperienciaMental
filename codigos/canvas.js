@@ -65,8 +65,40 @@ function CrearCanvas(idOpcionPersonaje) {
   }
 
   // --- Luz ---
-  const luzAmbiente = new THREE.AmbientLight(0xffffff, 1.1);
-  escena.add(luzAmbiente);
+  // const luzAmbiente = new THREE.AmbientLight(0xffffff, 1.1);
+  // escena.add(luzAmbiente);
+
+  /***** Cargar PointLight (Luz Puntual) *****/
+
+  // 1. Crear la luz
+  const colorLuz = 0xffffff; // Blanco
+  const intensidad = 1.1; // Intensidad de la luz (valor típico es 1)
+  const distancia = 0; // Distancia a la que la luz deja de afectar (0 significa infinita)
+  const decaimiento = 2; // Qué tan rápido decae la intensidad (2 es realista)
+
+  const pointLight = new THREE.PointLight(
+    colorLuz,
+    intensidad,
+    distancia,
+    decaimiento
+  );
+
+  // 2. Posicionar la luz
+  // Ubicaremos la luz en el techo, quizás en el centro del aula (0, 7, 0)
+  pointLight.position.set(0, 5, 0);
+
+  // 3. Opcional: Configurar sombras
+  // Esto es importante si quieres que esta luz proyecte sombras.
+  // Debes llamar a esta luz desde una fuente más general (como el sol/DirectionalLight)
+  // para las sombras en tu escena global, pero puedes activarlas para esta luz:
+  pointLight.castShadow = true;
+  pointLight.shadow.mapSize.width = 1024; // Resolución de la sombra
+  pointLight.shadow.mapSize.height = 1024; // Resolución de la sombra
+  pointLight.shadow.camera.near = 0.5; // Cerca y lejos son importantes para el rendimiento
+  pointLight.shadow.camera.far = 100;
+
+  // 4. Agregar a la escena
+  escena.add(pointLight);
 
   // --- Mirada (rotación) ---
   const movimiento = crearMovimientoCamara(camara, renderizador);
