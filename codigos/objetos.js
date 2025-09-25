@@ -1,5 +1,9 @@
 import { GLTFLoader } from "../libs/GLTFLoader.js";
 
+// --- Declarar el mixer fuera de la función de carga ---
+let mixer;
+const animations = {};
+
 function crearObjetos(escena) {
   console.log("Creando objetos...");
   const loadingManager = new THREE.LoadingManager();
@@ -17,29 +21,32 @@ function crearObjetos(escena) {
     console.log("termino");
 
     progressBarConteiner.style.display = "none";
-    
+
     // Reproducir sonido de campana escolar cuando terminan de cargar todos los objetos
     const schoolBell = document.getElementById("school-bell");
     const pantallaCarga = document.getElementById("pantalla-carga");
-    
+
     if (schoolBell && pantallaCarga) {
       // Cambiar mensaje en la pantalla negra
-      const mensaje = pantallaCarga.querySelector('div > div:first-child');
+      const mensaje = pantallaCarga.querySelector("div > div:first-child");
       if (mensaje) {
         mensaje.textContent = "¡Listo! Bienvenido al aula";
       }
-      
+
       // Reproducir sonido de campana
-      schoolBell.play().then(() => {
-        console.log("Reproduciendo campana escolar");
-      }).catch((error) => {
-        console.log("Error al reproducir audio:", error);
-        // Si falla el audio, ocultar pantalla inmediatamente
-        ocultarPantallaCarga();
-      });
+      schoolBell
+        .play()
+        .then(() => {
+          console.log("Reproduciendo campana escolar");
+        })
+        .catch((error) => {
+          console.log("Error al reproducir audio:", error);
+          // Si falla el audio, ocultar pantalla inmediatamente
+          ocultarPantallaCarga();
+        });
 
       // Esperar a que termine el audio (3 segundos) para ocultar la pantalla
-      schoolBell.addEventListener('ended', ocultarPantallaCarga);
+      schoolBell.addEventListener("ended", ocultarPantallaCarga);
 
       // Fallback: si por alguna razón el evento 'ended' no se dispara
       setTimeout(ocultarPantallaCarga, 3500);
@@ -49,18 +56,18 @@ function crearObjetos(escena) {
     }
 
     function ocultarPantallaCarga() {
-      if (pantallaCarga && pantallaCarga.classList.contains('visible')) {
-      pantallaCarga.classList.add("fade-out");
-      setTimeout(() => {
-        pantallaCarga.classList.remove("visible");
-        pantallaCarga.classList.remove("fade-out");
-        pantallaCarga.style.display = "none";
-        // 👉 avisamos que la pantalla de carga ya no está
-        window.dispatchEvent(new Event('ui:pantalla-carga-oculta'));
-      }, 1000);
+      if (pantallaCarga && pantallaCarga.classList.contains("visible")) {
+        pantallaCarga.classList.add("fade-out");
+        setTimeout(() => {
+          pantallaCarga.classList.remove("visible");
+          pantallaCarga.classList.remove("fade-out");
+          pantallaCarga.style.display = "none";
+          // 👉 avisamos que la pantalla de carga ya no está
+          window.dispatchEvent(new Event("ui:pantalla-carga-oculta"));
+        }, 1000);
       } else {
-      // Por si no estaba visible, igual avisamos
-      window.dispatchEvent(new Event('ui:pantalla-carga-oculta'));
+        // Por si no estaba visible, igual avisamos
+        window.dispatchEvent(new Event("ui:pantalla-carga-oculta"));
       }
     }
   };
@@ -272,22 +279,33 @@ function crearObjetos(escena) {
     }
   );
 
-  /****** Cargar Profesor  ******/
-
-  // Cargar profesor
+  // --- Modificar la función de carga ---
   loader.load(
-    "assets/models/personajes/personaje2/scene.gltf", // <-- ruta a tu modelo descargado
+    "assets/models/personajes/Profesor.glb",
     function (gltf) {
       const profesor = gltf.scene;
 
-      // Posición: centrada en la pared opuesta
-      profesor.position.set(-5, -2.2, 9); // Z positivo para la pared opuesta
-
-      // Escalar según necesites
-      profesor.scale.set(3, 3, 3); // ancho x alto x profundidad
-
-      // Rotar 180 grados para que mire hacia el aula
+      // Posición, escala y rotación...
+      profesor.position.set(-5, -2.2, 9);
+      profesor.scale.set(3, 3, 3);
       profesor.rotation.y = Math.PI;
+
+      // AÑADIR ESTE CÓDIGO 👇
+      if (gltf.animations && gltf.animations.length) {
+        // 1. Crear el AnimationMixer para el profesor
+        mixer = new THREE.AnimationMixer(profesor);
+
+        // 2. Iterar sobre las animaciones y guardarlas
+        gltf.animations.forEach((clip) => {
+          const action = mixer.clipAction(clip);
+          animations[clip.name] = action;
+        });
+        console.log(animations);
+
+        animations["hablando"].play();
+        // animations["gritando"].stop();
+        // animations["t-pose"].stop();
+      }
 
       escena.add(profesor);
     },
@@ -298,4 +316,4 @@ function crearObjetos(escena) {
   );
 }
 
-export { crearObjetos };
+export { crearObjetos, animations, mixer };
