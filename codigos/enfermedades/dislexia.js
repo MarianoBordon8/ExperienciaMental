@@ -1,84 +1,81 @@
-// codigos/dislexia.js
-// Maneja toda la lógica relacionada con el modo dislexia (alternancia imagen/video del televisor y efectos en el examen)
+// codigos/enfermedades/dislexia.js
+// Maneja la lógica del modo dislexia (televisor + examen)
 
-let estadoDislexia = false; // false = modo normal, true = modo dislexia
+let estadoDislexia = false; // false = normal, true = dislexia
 let televisorActual = null;
 let examenActual = null;
 let personajeSeleccionado = null;
 
-// Configurar el sistema de dislexia con los objetos televisor y examen
+// Intensidad del efecto (1 = normal, 0.5 = leve, 1.5/2 = fuerte). Hasta 3 para "muy fuerte".
+let intensidadDislexia = 1.25;
+
 function inicializarSistemaDislexia(televisor, examen, idPersonaje) {
   televisorActual = televisor;
   examenActual = examen;
   personajeSeleccionado = idPersonaje;
-  
   console.log(`Sistema de dislexia inicializado para personaje: ${idPersonaje}`);
 }
 
-// Alternar entre modo normal y modo dislexia
 function alternarModoDislexia() {
-  // Solo permitir alternancia si el personaje es "Juan"
   if (personajeSeleccionado !== "Juan") {
     console.log("La alternancia de modo dislexia solo está disponible para Juan");
     return false;
   }
-
-  // Cambiar el estado
   estadoDislexia = !estadoDislexia;
-  
-  console.log(`Modo dislexia: ${estadoDislexia ? 'ACTIVADO' : 'DESACTIVADO'}`);
+  console.log(`Modo dislexia: ${estadoDislexia ? "ACTIVADO" : "DESACTIVADO"}`);
 
-  // Alternar el televisor
-  if (televisorActual) {
-    televisorActual.cambiarModo(estadoDislexia);
-  }
-
-  // Sincronizar el examen
+  if (televisorActual) televisorActual.cambiarModo(estadoDislexia);
   sincronizarExamenConDislexia();
-
   return true;
 }
 
-// Sincronizar el contenido del examen según el estado actual de dislexia
 function sincronizarExamenConDislexia() {
-  if (!examenActual || !examenActual.getHojaVisible()) {
-    return; // No hacer nada si el examen no está visible
-  }
+  if (!examenActual || !examenActual.getHojaVisible()) return;
+
+  const el = document.getElementById("textoHoja");
+  if (!el) return;
 
   if (estadoDislexia) {
+    // 1) setear intensidad y clase
+    el.style.setProperty("--k", String(intensidadDislexia));
+    el.classList.add("dyslexia-on");
+    // 2) generar contenido con reglas aplicadas
     examenActual.llenarContenidoExamenDislexia();
   } else {
     examenActual.llenarContenidoExamen();
+    el.style.removeProperty("--k");
+    el.classList.remove("dyslexia-on");
   }
 }
 
-// Obtener el estado actual del modo dislexia
-function getEstadoDislexia() {
-  return estadoDislexia;
+function getEstadoDislexia() { return estadoDislexia; }
+function puedeUsarDislexia() { return personajeSeleccionado === "Juan"; }
+
+// Ajusta intensidad global del efecto (se aplica en caliente si está activo)
+function setIntensidadDislexia(n) {
+  const v = Number(n);
+  if (Number.isFinite(v)) {
+    intensidadDislexia = Math.min(3, Math.max(0.5, v));
+    const el = document.getElementById("textoHoja");
+    if (el && estadoDislexia) {
+      el.style.setProperty("--k", String(intensidadDislexia));
+      examenActual?.llenarContenidoExamenDislexia?.(); // re-render para aplicar nuevas probabilidades
+    }
+  }
+  return intensidadDislexia;
 }
 
-// Obtener si el personaje actual puede usar el modo dislexia
-function puedeUsarDislexia() {
-  return personajeSeleccionado === "Juan";
-}
-
-// Forzar un estado específico de dislexia (útil para debugging o casos especiales)
+// Forzar estado (debug)
 function forzarEstadoDislexia(nuevoEstado) {
   if (personajeSeleccionado !== "Juan") {
     console.warn("No se puede forzar estado de dislexia para personajes que no sean Juan");
     return false;
   }
-
   if (estadoDislexia !== nuevoEstado) {
     estadoDislexia = nuevoEstado;
-    
-    if (televisorActual) {
-      televisorActual.cambiarModo(estadoDislexia);
-    }
-    
+    if (televisorActual) televisorActual.cambiarModo(estadoDislexia);
     sincronizarExamenConDislexia();
   }
-  
   return true;
 }
 
@@ -88,5 +85,7 @@ export {
   sincronizarExamenConDislexia,
   getEstadoDislexia,
   puedeUsarDislexia,
-  forzarEstadoDislexia
+  forzarEstadoDislexia,
+  setIntensidadDislexia,
+  intensidadDislexia
 };
