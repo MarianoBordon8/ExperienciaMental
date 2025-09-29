@@ -7,6 +7,8 @@
     <title>Empathy Lab</title>
 
     <!-- Fuentes / iconos -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;800;900&display=swap" rel="stylesheet"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
 
@@ -15,64 +17,38 @@
     <link rel="stylesheet" href="style.css" />
     <link rel="author" href="humans.txt" />
 
-    <!-- Ajustes UX/scroll + animaciones + blindajes -->
+    <!-- Hints: calienta el módulo del simulador -->
+    <link rel="modulepreload" href="codigos/canvas.js" />
+
+    <!-- Ajustes UX/scroll + blindajes -->
     <style>
-      /* Asegura que la landing pueda scrollear (style.css pone overflow:hidden) */
-      body { overflow: auto !important; }
+      /* Solo scroll vertical en la landing */
+      html { scroll-behavior: smooth; overflow-x: hidden; }
+      body { overflow-y: auto !important; overflow-x: hidden !important; }
       body.no-scroll { overflow: hidden !important; } /* solo mientras corre el simulador */
 
-      html { scroll-behavior: smooth; }
       #experiencias, #como-jugar, #objetivos, #sobre { scroll-margin-top: 80px; }
 
       /* Reveal on scroll */
       .reveal { opacity: 0; transform: translateY(18px); transition: opacity .6s ease, transform .6s ease; }
       .reveal.in { opacity: 1; transform: none; }
 
-      /* Blindaje visual al salir: que el canvas NO pueda mostrarse */
-      body.exiting .threejsCanvas { 
-        display: none !important; 
-        visibility: hidden !important; 
-        opacity: 0 !important;
-      }
+      /* Blindaje visual al salir */
+      body.exiting .threejsCanvas { display: none !important; visibility: hidden !important; opacity: 0 !important; }
 
       /* Respeto a usuarios con “reducir movimiento” */
       @media (prefers-reduced-motion: reduce) {
         .hero__bg, .exp-card { animation: none !important; transition: none !important; }
       }
 
-      /* ===== Botón salir arriba de TODO y clickeable durante la carga ===== */
-      .btn-exit{
-        position: fixed;
-        top: 14px;
-        left: 14px;
-        z-index: 10050;             /* > 9999 de pantalla de carga */
-        border-radius: 10px;
-        padding: 10px 14px;
-        opacity: .98;
-      }
+      /* Botón salir por encima de la pantalla de carga */
+      .btn-exit{ position: fixed; top: 14px; left: 14px; z-index: 10050; border-radius: 10px; padding: 10px 14px; opacity: .98; }
       .btn-exit:hover{ opacity: 1; }
 
       /* La pantalla de carga no bloquea clics al botón que va por encima */
       .pantalla-carga { pointer-events: none; }
     </style>
   </head>
-
-  <!-- Parallax ultra liviano del blob del hero -->
-  <script>
-    (function() {
-      const bg = document.querySelector('.hero__bg');
-      if (!bg) return;
-      let raf = null;
-      window.addEventListener('scroll', () => {
-        if (raf) return;
-        raf = requestAnimationFrame(() => {
-          const y = Math.min(window.scrollY, 400);
-          bg.style.transform = `translate3d(${y * 0.02}px, ${-y * 0.04}px, 0)`;
-          raf = null;
-        });
-      }, { passive: true });
-    })();
-  </script>
 
   <body>
     <!-- ===== Landing / Menú ===== -->
@@ -98,14 +74,11 @@
         </nav>
       </header>
 
-      <!-- ===== HERO NUEVO ===== -->
+      <!-- ===== HERO ===== -->
       <section class="hero">
         <div class="hero__inner hero__layout">
-          <!-- Columna izquierda: copy -->
           <div class="hero__copy">
-            <h1 class="hero__title">
-              Empathy <span>Lab</span>
-            </h1>
+            <h1 class="hero__title">Empathy <span>Lab</span></h1>
             <p class="hero__lead">
               Una experiencia 3D interactiva para comprender distintas formas de percibir una clase.
             </p>
@@ -122,7 +95,7 @@
             </div>
           </div>
 
-          <!-- Columna derecha: “terminal” de propósito -->
+          <!-- “Terminal” de propósito -->
           <div class="hero__visual">
             <div class="panel">
               <div class="panel__bar" aria-hidden="true">
@@ -131,10 +104,7 @@
                 <span class="dot dot--green"></span>
                 <span class="panel__title">Nuestro propósito</span>
               </div>
-
-              <!-- Tu typewriter escribe dentro de .demo -->
               <pre class="panel__body"><code class="demo" aria-label="Nuestro propósito"></code></pre>
-
               <div class="panel__footer" aria-hidden="true">
                 <span class="badge">Empatía</span>
                 <span class="badge">Accesibilidad</span>
@@ -147,7 +117,7 @@
         <!-- Glow del hero -->
         <div class="hero__bg" aria-hidden="true"></div>
 
-        <!-- Indicador de scroll centrado al pie del hero -->
+        <!-- Indicador de scroll centrado -->
         <a class="scroll-indicator" href="#experiencias" aria-label="Bajar a Experiencias">
           <span class="chevron"></span><span class="chevron"></span><span class="chevron"></span>
         </a>
@@ -160,11 +130,8 @@
           <!-- JUAN -->
           <article class="exp-card reveal">
             <div class="exp-card__media">
-              <img
-                alt="Juan — Dislexia"
-                loading="lazy" decoding="async"
-                src="data:image/svg+xml;utf8,<?xml version='1.0' encoding='UTF-8'?><svg xmlns='http://www.w3.org/2000/svg' width='800' height='450'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop stop-color='%2322458a' offset='0'/><stop stop-color='%230b1020' offset='1'/></linearGradient></defs><rect width='100%25' height='100%25' fill='url(%23g)'/><text x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='%23cfe4ff' font-family='Nunito Sans, Arial' font-size='36'>Juan — Dislexia</text></svg>"
-              />
+              <img alt="Juan — Dislexia" loading="lazy" decoding="async"
+                src="data:image/svg+xml;utf8,<?xml version='1.0' encoding='UTF-8'?><svg xmlns='http://www.w3.org/2000/svg' width='800' height='450'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop stop-color='%2322458a' offset='0'/><stop stop-color='%230b1020' offset='1'/></linearGradient></defs><rect width='100%25' height='100%25' fill='url(%23g)'/><text x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='%23cfe4ff' font-family='Nunito Sans, Arial' font-size='36'>Juan — Dislexia</text></svg>" />
               <span class="exp-card__tag">Dislexia</span>
             </div>
             <div class="exp-card__body">
@@ -179,11 +146,8 @@
           <!-- MARIO -->
           <article class="exp-card reveal">
             <div class="exp-card__media">
-              <img
-                alt="Mario — Esquizofrenia"
-                loading="lazy" decoding="async"
-                src="data:image/svg+xml;utf8,<?xml version='1.0' encoding='UTF-8'?><svg xmlns='http://www.w3.org/2000/svg' width='800' height='450'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop stop-color='%23174b3a' offset='0'/><stop stop-color='%230b1020' offset='1'/></linearGradient></defs><rect width='100%25' height='100%25' fill='url(%23g)'/><text x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='%23d9ffe8' font-family='Nunito Sans, Arial' font-size='36'>Mario — Esquizofrenia</text></svg>"
-              />
+              <img alt="Mario — Esquizofrenia" loading="lazy" decoding="async"
+                src="data:image/svg+xml;utf8,<?xml version='1.0' encoding='UTF-8'?><svg xmlns='http://www.w3.org/2000/svg' width='800' height='450'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop stop-color='%23174b3a' offset='0'/><stop stop-color='%230b1020' offset='1'/></linearGradient></defs><rect width='100%25' height='100%25' fill='url(%23g)'/><text x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='%23d9ffe8' font-family='Nunito Sans, Arial' font-size='36'>Mario — Esquizofrenia</text></svg>" />
               <span class="exp-card__tag">Esquizofrenia</span>
             </div>
             <div class="exp-card__body">
@@ -198,11 +162,8 @@
           <!-- FRANCO -->
           <article class="exp-card reveal">
             <div class="exp-card__media">
-              <img
-                alt="Franco — Ansiedad"
-                loading="lazy" decoding="async"
-                src="data:image/svg+xml;utf8,<?xml version='1.0' encoding='UTF-8'?><svg xmlns='http://www.w3.org/2000/svg' width='800' height='450'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop stop-color='%23386bff' offset='0'/><stop stop-color='%230b1020' offset='1'/></linearGradient></defs><rect width='100%25' height='100%25' fill='url(%23g)'/><text x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='%23cfe4ff' font-family='Nunito Sans, Arial' font-size='36'>Franco — Ansiedad</text></svg>"
-              />
+              <img alt="Franco — Ansiedad" loading="lazy" decoding="async"
+                src="data:image/svg+xml;utf8,<?xml version='1.0' encoding='UTF-8'?><svg xmlns='http://www.w3.org/2000/svg' width='800' height='450'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop stop-color='%23386bff' offset='0'/><stop stop-color='%230b1020' offset='1'/></linearGradient></defs><rect width='100%25' height='100%25' fill='url(%23g)'/><text x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='%23cfe4ff' font-family='Nunito Sans, Arial' font-size='36'>Franco — Ansiedad</text></svg>" />
               <span class="exp-card__tag">Ansiedad</span>
             </div>
             <div class="exp-card__body">
@@ -285,8 +246,8 @@
       </div>
     </div>
 
-    <!-- Scripts -->
-    <script src="libs/three.min.js"></script>
+    <!-- Scripts: Three no bloquea, main.js es módulo -->
+    <script src="libs/three.min.js" defer></script>
     <script type="module" src="main.js"></script>
 
     <!-- Nav móvil, anclas suaves, reveal on scroll -->

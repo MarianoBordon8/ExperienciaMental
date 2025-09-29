@@ -34,12 +34,10 @@ body{
 .nav__toggle{display:none;background:none;border:0;cursor:pointer}
 .nav__toggle span{display:block;width:22px;height:2px;background:#fff;margin:4px 0}
 
-/* ================= HERO NUEVO ================= */
-.hero{position:relative; padding:92px 20px 96px;} /* extra bottom para las flechitas */
+/* ================= HERO ================= */
+.hero{position:relative; padding:92px 20px 96px;}
 .hero__inner{max-width:1180px;margin:0 auto}
-.hero__layout{
-  display:grid; grid-template-columns: 1.15fr 1fr; gap:34px; align-items:center;
-}
+.hero__layout{display:grid; grid-template-columns: 1.15fr 1fr; gap:34px; align-items:center;}
 .hero__copy{text-align:left}
 .hero__title{
   font-size:64px; line-height:1.02; margin:0 0 10px; font-weight:900; letter-spacing:.2px;
@@ -88,7 +86,6 @@ body{
   backdrop-filter: blur(10px);
 }
 .panel::before{
-  /* sutil grid */
   content:""; position:absolute; inset:0; pointer-events:none; opacity:.18;
   background:
     linear-gradient(transparent 31px, rgba(255,255,255,.06) 32px),
@@ -115,11 +112,9 @@ body{
 .panel__body code.demo{
   display:block; white-space: pre-wrap; word-wrap: break-word; overflow-wrap: anywhere;
   line-height:1.45; font-size:14px;
-  /* anti-glitches mientras escribe */
   font-variant-ligatures: none;
   -webkit-font-smoothing: antialiased;
 }
-/* Cursor parpadeando del typewriter */
 .panel__body code.demo::after{
   content:"▍"; margin-left:2px; opacity:.9; animation: caretBlink 1.1s steps(1) infinite;
 }
@@ -147,41 +142,31 @@ body{
   100% { transform: translate3d(6px, -6px, 0) scale(1.05); filter: blur(42px); }
 }
 
-/* Indicador de scroll (centrado al pie del hero) */
+/* Indicador de scroll (centrado) */
 .scroll-indicator{
-  position:absolute;
-  left:50%;
-  bottom:20px;
-  transform:translateX(-50%);
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  color:#cfe4ff;
-  text-decoration:none;
-  font-weight:700;
-  opacity:.65;
-  transition: opacity .2s, transform .2s;
+  position:absolute; left:50%; bottom:20px; transform:translateX(-50%);
+  display:inline-flex; align-items:center; gap:8px; color:#cfe4ff; text-decoration:none; font-weight:700;
+  opacity:.65; transition: opacity .2s, transform .2s;
 }
-.scroll-indicator:hover{
-  opacity:1;
-  transform:translate(-50%, -2px);
-}
+.scroll-indicator:hover{ opacity:1; transform:translate(-50%, -2px); }
 .chevron{
-  width:10px; height:10px;
-  border-right:2px solid currentColor; border-bottom:2px solid currentColor;
-  transform: rotate(45deg);
-  animation: bob 1.4s infinite ease-in-out;
+  width:10px; height:10px; border-right:2px solid currentColor; border-bottom:2px solid currentColor;
+  transform: rotate(45deg); animation: bob 1.4s infinite ease-in-out;
 }
 .chevron:nth-child(2){ animation-delay:.12s }
 .chevron:nth-child(3){ animation-delay:.24s }
-@keyframes bob{
-  0%,100%{ transform: rotate(45deg) translate(0,0); opacity:.35 }
-  50%{ transform: rotate(45deg) translate(3px,3px); opacity:1 }
-}
+@keyframes bob{ 0%,100%{ transform: rotate(45deg) translate(0,0); opacity:.35 } 50%{ transform: rotate(45deg) translate(3px,3px); opacity:1 } }
 
 /* ===== SECTIONS ===== */
 .section__title{font-size:28px;margin:0 0 18px;text-align:center}
 .experiencias, .features, .howto, .about{padding:38px 20px}
+
+/* 🚀 Pinta solo cuando aparecen (gran ahorro) */
+.experiencias, .features, .howto, .about{
+  content-visibility:auto;
+  contain-intrinsic-size: 800px; /* tamaño estimado para reservar espacio */
+}
+
 .experiencias .exp-grid{
   max-width:1100px; margin:0 auto; display:grid; gap:18px;
   grid-template-columns: repeat(3, minmax(0,1fr));
@@ -204,17 +189,12 @@ body{
 .btn--secondary{background:#0e1835;border:1px solid #22305f;color:#cfe4ff}
 .btn--secondary:hover{border-color:#3a56a3}
 
-.features__grid{
-  max-width:1000px; margin:0 auto; display:grid; gap:16px; grid-template-columns:repeat(3,minmax(0,1fr));
-}
+.features__grid{ max-width:1000px; margin:0 auto; display:grid; gap:16px; grid-template-columns:repeat(3,minmax(0,1fr)); }
 .feature{background:rgba(0,0,0,.25); border:1px solid var(--border); padding:16px; border-radius:12px; min-height:150px}
 .feature h3{margin:0 0 8px}
 
 .howto .kb{list-style:none; padding:0; margin:0 auto; max-width:800px; display:grid; gap:12px}
-.kbd{
-  font-family: ui-monospace,Consolas,monospace; background:#0e142a; border:1px solid #23305a; padding:4px 8px; border-radius:6px;
-  margin-right:8px; color:#cfe4ff
-}
+.kbd{ font-family: ui-monospace,Consolas,monospace; background:#0e142a; border:1px solid #23305a; padding:4px 8px; border-radius:6px; margin-right:8px; color:#cfe4ff }
 
 .about{max-width:900px; margin:0 auto; text-align:center}
 .about p{color:var(--muted); margin:0 auto 12px}
@@ -226,7 +206,7 @@ body{
 
 /* Mobile */
 @media (max-width: 980px){
-  .hero{padding:72px 18px 88px;} /* mantiene espacio para flechas */
+  .hero{padding:72px 18px 88px;}
   .hero__layout{grid-template-columns: 1fr; gap:22px}
   .hero__title{font-size:44px}
   .hero__bg{width:280px;height:280px}
