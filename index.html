@@ -1,175 +1,331 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
   <head>
     <meta charset="utf-8" />
-    <meta name="description" content="" />
+    <meta name="description" content="Empathy Lab — simulador 3D educativo" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Empathy Lab</title>
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
-    />
-    <link
-      href="https://fonts.googleapis.com/css?family=Nunito+Sans:300,400,600,700,800,900"
-      rel="stylesheet"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/railscasts.min.css"
-    />
-    <!-- <link rel="stylesheet" href="scribbler-global.css" /> -->
-    <!-- <link rel="stylesheet" href="scribbler-landing.css" /> -->
-    <link rel="stylesheet" href="main.css" />
+
+    <!-- Fuentes / iconos -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;800;900&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
+
+    <!-- Estilos base -->
+    <link rel="stylesheet" href="landing.css" />
     <link rel="stylesheet" href="style.css" />
-
     <link rel="author" href="humans.txt" />
+
+    <!-- Ajustes UX/scroll + animaciones + blindajes -->
+    <style>
+      /* Asegura que la landing pueda scrollear (style.css pone overflow:hidden) */
+      body { overflow: auto !important; }
+      body.no-scroll { overflow: hidden !important; } /* solo mientras corre el simulador */
+
+      html { scroll-behavior: smooth; }
+      #experiencias, #como-jugar, #objetivos, #sobre { scroll-margin-top: 80px; }
+
+      /* Reveal on scroll */
+      .reveal { opacity: 0; transform: translateY(18px); transition: opacity .6s ease, transform .6s ease; }
+      .reveal.in { opacity: 1; transform: none; }
+
+      /* Blindaje visual al salir: que el canvas NO pueda mostrarse */
+      body.exiting .threejsCanvas { 
+        display: none !important; 
+        visibility: hidden !important; 
+        opacity: 0 !important;
+      }
+
+      /* Respeto a usuarios con “reducir movimiento” */
+      @media (prefers-reduced-motion: reduce) {
+        .hero__bg, .exp-card { animation: none !important; transition: none !important; }
+      }
+
+      /* ===== Botón salir arriba de TODO y clickeable durante la carga ===== */
+      .btn-exit{
+        position: fixed;
+        top: 14px;
+        left: 14px;
+        z-index: 10050;             /* > 9999 de pantalla de carga */
+        border-radius: 10px;
+        padding: 10px 14px;
+        opacity: .98;
+      }
+      .btn-exit:hover{ opacity: 1; }
+
+      /* La pantalla de carga no bloquea clics al botón que va por encima */
+      .pantalla-carga { pointer-events: none; }
+    </style>
   </head>
+
+  <!-- Parallax ultra liviano del blob del hero -->
+  <script>
+    (function() {
+      const bg = document.querySelector('.hero__bg');
+      if (!bg) return;
+      let raf = null;
+      window.addEventListener('scroll', () => {
+        if (raf) return;
+        raf = requestAnimationFrame(() => {
+          const y = Math.min(window.scrollY, 400);
+          bg.style.transform = `translate3d(${y * 0.02}px, ${-y * 0.04}px, 0)`;
+          raf = null;
+        });
+      }, { passive: true });
+    })();
+  </script>
+
   <body>
-    <div class="pagina-elejir-opcion">
-      <nav>
-        <div class="logo"></div>
-        <ul class="menu">
-          <div class="menu__item toggle"><span></span></div>
-          <li class="menu__item">
-            <a href="No_programamos_esta_pagina_todavia" class="link link--dark"
-              ><i class="fa fa-book"></i> Sobre este Proyecto</a
-            >
-          </li>
-          <li class="menu__item">
-            <a
-              href="https://github.com/MarianoBordon8/ExperienciaMental"
-              class="link link--dark"
-              ><i class="fa fa-github"></i> Github</a
-            >
-          </li>
-        </ul>
-      </nav>
-      <div class="hero">
-        <h1 class="hero__title">Empathy Lab</h1>
-        <p class="hero__description">
-          Una experiencia 3D interactiva que demuestra diferentes de diferentes
-          maneras que siente cada una de las personas
-        </p>
-      </div>
-      <div class="hero__terminal">
-        <pre>
-        <code class="shell-session demo">Nuestro Proposito? </code>
-      </pre>
-      </div>
-      <div class="wrapper">
-        <div class="installation">
-          <h3 class="section__title">Seleccion de personaje</h3>
-          <div class="tab__container">
-            <ul class="tab__menu">
-              <li class="tab active" data-tab="mac">Juan</li>
-              <li class="tab" data-tab="linux">Mario</li>
-              <li class="tab" data-tab="win">Franco</li>
-            </ul>
+    <!-- ===== Landing / Menú ===== -->
+    <div class="landing" id="top">
+      <header class="nav">
+        <div class="nav__left">
+          <a href="#top" class="brand">
+            <span class="brand__logo">🧠</span>
+            <span class="brand__name">Empathy Lab</span>
+          </a>
+        </div>
+        <button class="nav__toggle" aria-label="Abrir menú" id="navToggle">
+          <span></span><span></span><span></span>
+        </button>
+        <nav class="nav__right" id="navMenu">
+          <a href="#experiencias">Experiencias</a>
+          <a href="#como-jugar">Cómo jugar</a>
+          <a href="#objetivos">Objetivos</a>
+          <a href="#sobre">Sobre el proyecto</a>
+          <a href="https://github.com/MarianoBordon8/ExperienciaMental" target="_blank" rel="noopener">
+            <i class="fa fa-github"></i> GitHub
+          </a>
+        </nav>
+      </header>
 
-            <div class="tab__pane active mac">
-              <pre class="nohighlight code">
-Elije esta experiencia DISLEXIA (Pequeña descripcion de la experiencia)
-      </pre
-              >
-              <button id="Juan" class="button--secondary">Elegir Juan</button>
+      <!-- ===== HERO NUEVO ===== -->
+      <section class="hero">
+        <div class="hero__inner hero__layout">
+          <!-- Columna izquierda: copy -->
+          <div class="hero__copy">
+            <h1 class="hero__title">
+              Empathy <span>Lab</span>
+            </h1>
+            <p class="hero__lead">
+              Una experiencia 3D interactiva para comprender distintas formas de percibir una clase.
+            </p>
+
+            <div class="hero__chips" aria-hidden="true">
+              <span class="chip">3D interactivo</span>
+              <span class="chip">Educativo</span>
+              <span class="chip">Inclusión</span>
             </div>
 
-            <div class="tab__pane linux">
-              <pre class="nohighlight code">
-Elije esta experiencia ESQUIZOFRENIA (falta agregar una explicacion)
-      </pre
-              >
-              <button id="Mario" class="button--secondary">Elegir Mario</button>
+            <div class="hero__cta">
+              <a href="#experiencias" class="btn btn--primary">Entrar al simulador</a>
+              <a href="#sobre" class="btn btn--ghost">Saber más</a>
             </div>
+          </div>
 
-            <div class="tab__pane win">
-              <pre class="nohighlight code">
-Elije esta experiencia ANSIEDAD (agregar una descripcion)
-      </pre
-              >
-              <button id="Franco" class="button--secondary">
-                Elegir Franco
-              </button>
+          <!-- Columna derecha: “terminal” de propósito -->
+          <div class="hero__visual">
+            <div class="panel">
+              <div class="panel__bar" aria-hidden="true">
+                <span class="dot dot--red"></span>
+                <span class="dot dot--yellow"></span>
+                <span class="dot dot--green"></span>
+                <span class="panel__title">Nuestro propósito</span>
+              </div>
+
+              <!-- Tu typewriter escribe dentro de .demo -->
+              <pre class="panel__body"><code class="demo" aria-label="Nuestro propósito"></code></pre>
+
+              <div class="panel__footer" aria-hidden="true">
+                <span class="badge">Empatía</span>
+                <span class="badge">Accesibilidad</span>
+                <span class="badge">Prácticas inclusivas</span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      <div class="feature">
-        <div class="feature__item">
-          <h3 class="section__title">Objetivos</h3>
-          <p>
-            Hacer tangible la diversidad de percepciones en clase (texto,
-            sonido, foco atencional, carga sensorial).<br /><br />Ofrecer
-            decisiones y ajustes posibles dentro de la narrativa (p. ej.,
-            reformular consigna, regular estímulos, turnos claros, apoyos
-            visuales/sonoros).<br /><br />Cerrar con reflexión guiada: qué
-            ayudó, qué costó y qué podría cambiar en la práctica docente y entre
-            pares.
-          </p>
+
+        <!-- Glow del hero -->
+        <div class="hero__bg" aria-hidden="true"></div>
+
+        <!-- Indicador de scroll centrado al pie del hero -->
+        <a class="scroll-indicator" href="#experiencias" aria-label="Bajar a Experiencias">
+          <span class="chevron"></span><span class="chevron"></span><span class="chevron"></span>
+        </a>
+      </section>
+
+      <!-- ===== Secciones ===== -->
+      <section class="experiencias" id="experiencias">
+        <h2 class="section__title">Elegí tu experiencia</h2>
+        <div class="exp-grid">
+          <!-- JUAN -->
+          <article class="exp-card reveal">
+            <div class="exp-card__media">
+              <img
+                alt="Juan — Dislexia"
+                loading="lazy" decoding="async"
+                src="data:image/svg+xml;utf8,<?xml version='1.0' encoding='UTF-8'?><svg xmlns='http://www.w3.org/2000/svg' width='800' height='450'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop stop-color='%2322458a' offset='0'/><stop stop-color='%230b1020' offset='1'/></linearGradient></defs><rect width='100%25' height='100%25' fill='url(%23g)'/><text x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='%23cfe4ff' font-family='Nunito Sans, Arial' font-size='36'>Juan — Dislexia</text></svg>"
+              />
+              <span class="exp-card__tag">Dislexia</span>
+            </div>
+            <div class="exp-card__body">
+              <h3>Juan</h3>
+              <p>Lectura con esfuerzo (texto vibrante, saltos, desenfoque intermitente). Televisor con material adaptado.</p>
+            </div>
+            <div class="exp-card__actions">
+              <button class="btn btn--secondary start-sim" data-id="Juan">Elegir Juan</button>
+            </div>
+          </article>
+
+          <!-- MARIO -->
+          <article class="exp-card reveal">
+            <div class="exp-card__media">
+              <img
+                alt="Mario — Esquizofrenia"
+                loading="lazy" decoding="async"
+                src="data:image/svg+xml;utf8,<?xml version='1.0' encoding='UTF-8'?><svg xmlns='http://www.w3.org/2000/svg' width='800' height='450'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop stop-color='%23174b3a' offset='0'/><stop stop-color='%230b1020' offset='1'/></linearGradient></defs><rect width='100%25' height='100%25' fill='url(%23g)'/><text x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='%23d9ffe8' font-family='Nunito Sans, Arial' font-size='36'>Mario — Esquizofrenia</text></svg>"
+              />
+              <span class="exp-card__tag">Esquizofrenia</span>
+            </div>
+            <div class="exp-card__body">
+              <h3>Mario</h3>
+              <p>Susurros espaciales (HRTF) que aparecen de forma impredecible. Control total con tecla <strong>C</strong>.</p>
+            </div>
+            <div class="exp-card__actions">
+              <button class="btn btn--secondary start-sim" data-id="Mario">Elegir Mario</button>
+            </div>
+          </article>
+
+          <!-- FRANCO -->
+          <article class="exp-card reveal">
+            <div class="exp-card__media">
+              <img
+                alt="Franco — Ansiedad"
+                loading="lazy" decoding="async"
+                src="data:image/svg+xml;utf8,<?xml version='1.0' encoding='UTF-8'?><svg xmlns='http://www.w3.org/2000/svg' width='800' height='450'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop stop-color='%23386bff' offset='0'/><stop stop-color='%230b1020' offset='1'/></linearGradient></defs><rect width='100%25' height='100%25' fill='url(%23g)'/><text x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='%23cfe4ff' font-family='Nunito Sans, Arial' font-size='36'>Franco — Ansiedad</text></svg>"
+              />
+              <span class="exp-card__tag">Ansiedad</span>
+            </div>
+            <div class="exp-card__body">
+              <h3>Franco</h3>
+              <p>Pulso visual (zoom/vignette) sincronizado a latidos + respiración. Profesor reacciona con animaciones.</p>
+            </div>
+            <div class="exp-card__actions">
+              <button class="btn btn--secondary start-sim" data-id="Franco">Elegir Franco</button>
+            </div>
+          </article>
         </div>
-        <div class="feature__item">
-          <h3 class="section__title">Premisa General</h3>
-          <p>
-            “Una clase común”. El/la usuario/a está sentado/a en su banco;
-            escucha una explicación, recibe una consigna y participa con pares.
-            Puede activar modulaciones de percepción (texto, sonido, foco
-            visual) sin etiquetar ni patologizar.
-          </p>
+      </section>
+
+      <section class="features" id="objetivos">
+        <h2 class="section__title">Objetivos</h2>
+        <div class="features__grid">
+          <div class="feature reveal">
+            <h3>Hacer tangible la diversidad</h3>
+            <p>Explorar percepciones en clase (texto, sonido, foco atencional, carga sensorial).</p>
+          </div>
+          <div class="feature reveal">
+            <h3>Decisiones con impacto</h3>
+            <p>Ajustes posibles dentro de la narrativa: regular estímulos, apoyos, turnos claros.</p>
+          </div>
+          <div class="feature reveal">
+            <h3>Reflexión guiada</h3>
+            <p>Qué ayudó, qué costó y qué se podría cambiar en la práctica docente y entre pares.</p>
+          </div>
         </div>
-        <div class="feature__item">
-          <h3 class="section__title">Tono y Ética</h3>
-          <p>
-            Representación respetuosa, con control del/la usuario/a sobre la
-            experiencia y foco en aprender a apoyar más que en “mostrar
-            síntomas”.
-          </p>
-        </div>
-      </div>
-      <div class="keybinding">
-        <ul class="keybinding__detail">
-          <h3 class="keybinding__title">Como Jugar?</h3>
-          <li>
-            Mover Camara
-            <span class="keybinding__label">Click Izquierdo + Mouse</span>
-          </li>
-          <li>
-            Caminar hacia adelante <span class="keybinding__label">W</span>
-          </li>
-          <li>Interactuar <span class="keybinding__label">E</span></li>
-          <li>algo mas? <span class="keybinding__label">alguna tecla</span></li>
+      </section>
+
+      <section class="howto" id="como-jugar">
+        <h2 class="section__title">Cómo jugar</h2>
+        <ul class="kb">
+          <li class="reveal"><span class="kbd">Click + Mouse</span> Mover cámara</li>
+          <li class="reveal"><span class="kbd">P</span> Abrir parcial</li>
+          <li class="reveal"><span class="kbd">C</span> Efecto ON/OFF (según experiencia)</li>
+          <li class="reveal"><span class="kbd">Esc</span> Salir al menú</li>
         </ul>
-      </div>
-      <div class="callout">
-        <p>Puedes encontrar mas informacion sobre nosotros aqui</p>
-        <a href="NO_ESTA_PROGRAMADO_TODAVIA" class="button--primary"
-          >Sobre este Proyecto</a
-        >
-      </div>
+      </section>
+
+      <section class="about" id="sobre">
+        <h2 class="section__title">Sobre Empathy Lab</h2>
+        <p class="reveal">
+          “Una clase común” en primera persona. Usuario/a sentado/a en su banco,
+          escucha, recibe consignas y participa. Control respetuoso y ético: 
+          el foco está en comprender y apoyar.
+        </p>
+        <a class="btn btn--ghost" href="No_programamos_esta_pagina_todavia">Más info</a>
+      </section>
+
       <footer class="footer">
-        Creado por: Nicolas Murua - Mariano Bordon - Santino Chamia.
+        <div class="footer__inner">
+          <span>Creado por: Nicolas Murua — Mariano Bordon — Santino Chamia</span>
+          <a href="https://github.com/MarianoBordon8/ExperienciaMental" target="_blank" rel="noopener">
+            <i class="fa fa-github"></i> Repositorio
+          </a>
+        </div>
       </footer>
     </div>
+
+    <!-- ===== Simulador ===== -->
     <div class="threejsCanvas" style="display: none">
-      <!-- Audio de campana escolar -->
       <audio id="school-bell" preload="auto">
         <source src="assets/sounds/school-bell-310293.mp3" type="audio/mpeg" />
         Tu navegador no soporta el elemento de audio.
       </audio>
-      <!-- Pantalla negra durante carga de objetos -->
+
       <div id="pantalla-carga" class="pantalla-carga">
         <div style="color: white; font-size: 24px; text-align: center">
           <div>Cargando objetos 3D...</div>
           <div style="margin-top: 20px; font-size: 18px">Por favor espera</div>
         </div>
       </div>
-      <!-- Canvas donde se renderiza la escena -->
+
       <canvas id="miCanvas"></canvas>
       <div class="progress-bar-container">
         <label for="progress-bar">Loading...</label>
         <progress id="progress-bar" value="0" max="100"></progress>
       </div>
     </div>
-    <script type="module" src="main.js"></script>
+
+    <!-- Scripts -->
     <script src="libs/three.min.js"></script>
+    <script type="module" src="main.js"></script>
+
+    <!-- Nav móvil, anclas suaves, reveal on scroll -->
+    <script>
+      // Garantiza que la landing arranque scrolleable
+      document.body.classList.remove('no-scroll');
+
+      // Toggle menú móvil
+      const navToggle = document.getElementById('navToggle');
+      const navMenu = document.getElementById('navMenu');
+      if (navToggle && navMenu) {
+        navToggle.addEventListener('click', () => navMenu.classList.toggle('open'));
+        navMenu.addEventListener('click', (e) => { if (e.target.tagName === 'A') navMenu.classList.remove('open'); });
+      }
+
+      // Scroll suave programático (compatibilidad)
+      document.querySelectorAll('a[href^="#"]').forEach(a => {
+        a.addEventListener('click', (e) => {
+          const id = a.getAttribute('href').slice(1);
+          const target = document.getElementById(id);
+          if (!target) return;
+          e.preventDefault();
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          history.pushState(null, '', '#' + id);
+        });
+      });
+
+      // Reveal on scroll
+      (function(){
+        const els = document.querySelectorAll('.reveal');
+        if (!('IntersectionObserver' in window) || !els.length) {
+          els.forEach(el => el.classList.add('in'));
+          return;
+        }
+        const io = new IntersectionObserver(entries => {
+          entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }});
+        }, { threshold: 0.12 });
+        els.forEach(el => io.observe(el));
+      })();
+    </script>
   </body>
 </html>
