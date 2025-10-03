@@ -4,6 +4,69 @@ import { GLTFLoader } from "../libs/GLTFLoader.js";
 let mixer;
 const animations = {};
 
+// Función reutilizable para cargar alumnos
+function cargarAlumno(loader, escena, rutaModelo, sillaPos, opciones = {}) {
+  const {
+    escala = [1, 1, 1],
+    rotacionY = -Math.PI - 3.1,
+    offsetPosicion = { x: -0.5, y: -1.8, z: 0 },
+    alturaAsiento = -0.8
+  } = opciones;
+
+  loader.load(
+    rutaModelo,
+    function (gltf) {
+      const personaje = gltf.scene;
+
+      // Ajustar la posición sobre la silla
+      personaje.position.set(
+        sillaPos[0] + offsetPosicion.x,
+        sillaPos[1] + alturaAsiento + offsetPosicion.y,
+        sillaPos[2] + offsetPosicion.z
+      );
+
+      // Aplicar escala
+      personaje.scale.set(...escala);
+
+      // Aplicar rotación
+      personaje.rotation.y = rotacionY;
+
+      // Configurar animaciones del alumno
+      if (gltf.animations && gltf.animations.length) {
+        const alumnoMixer = new THREE.AnimationMixer(personaje);
+        const alumnoAnimations = {};
+
+        gltf.animations.forEach((clip) => {
+          const action = alumnoMixer.clipAction(clip);
+          alumnoAnimations[clip.name] = action;
+        });
+
+        console.log("Animaciones del alumno:", alumnoAnimations);
+
+        if (alumnoAnimations["sitting"]) {
+          alumnoAnimations["sitting"].play();
+        }
+
+        if (!window.alumnoMixers) window.alumnoMixers = [];
+        window.alumnoMixers.push(alumnoMixer);
+      }
+
+      // Desactivar frustum culling para que el personaje siempre sea visible
+      personaje.traverse((child) => {
+        if (child.isMesh) {
+          child.frustumCulled = false; // Desactivar culling - siempre visible
+        }
+      });
+
+      escena.add(personaje);
+    },
+    undefined,
+    function (error) {
+      console.error("Error cargando el personaje:", error);
+    }
+  );
+}
+
 function crearObjetos(escena) {
   console.log("Creando objetos...");
   const loadingManager = new THREE.LoadingManager();
@@ -153,7 +216,7 @@ function crearObjetos(escena) {
     [-2, 0.25, 3],
     [2, 0.25, 3], // Fila delantera
   ];
-  const colisionesSillas = [];
+
 
   posicionesSillas.forEach((pos) => {
     loader.load(
@@ -164,9 +227,6 @@ function crearObjetos(escena) {
         silla.scale.set(1.5, 1.5, 1.5);
         escena.add(silla);
 
-        // Crear caja de colisión
-        const caja = new THREE.Box3().setFromObject(silla);
-        colisionesSillas.push(caja);
       },
       undefined,
       function (error) {
@@ -175,36 +235,71 @@ function crearObjetos(escena) {
     );
   });
 
-  // Cargar personajes en todas las sillas
-  posicionesSillas.forEach((sillaPos, index) => {
-    if (index === 2) return; // salta esta silla
-    loader.load(
-      "assets/models/personajes/personaje1/personaje1glb.gltf",
-      function (gltf) {
-        // Clonar el modelo para que cada personaje sea independiente
-        const personaje = gltf.scene.clone();
-        // Ajustar la posición sobre la silla
-        const alturaAsiento = -0.8; // ajustá según tu modelo de silla
-        personaje.position.set(
-          sillaPos[0] - 0.5, // X de la silla
-          sillaPos[1] + alturaAsiento, // Y (altura del asiento)
-          sillaPos[2] // Z de la silla
-        );
+  /****** Cargar Alumnos ******/
 
-        // Escala del personaje
-        personaje.scale.set(3, 3, 3);
-
-        // Rotación para mirar hacia la pizarra (180°)
-        personaje.rotation.y = Math.PI + 3.1;
-
-        // Agregar a la escena
-        escena.add(personaje);
-      },
-      undefined,
-      function (error) {
-        console.error("Error cargando el personaje en la silla", index, error);
+  // Configuración de alumnos con sus posiciones y opciones específicas
+  const alumnos = [
+    {
+      modelo: "assets/models/personajes/alumno0/alumno0.gltf",
+      sillaIndex: 0,
+      opciones: { 
+        escala: [1, 1, 1], 
+        offsetPosicion: { x: -0.5, y: -1, z: -0.3 } 
       }
-    );
+    },
+    {
+      modelo: "assets/models/personajes/alumno1/alumno1.gltf",
+      sillaIndex: 1,
+      opciones: { 
+        escala: [2, 2, 2], 
+        offsetPosicion: { x: -0.5, y: -1, z: 0 } 
+      }
+    },
+    {
+      modelo: "assets/models/personajes/prueba/alumno2.gltf",
+      sillaIndex: 2,
+      opciones: { 
+        escala: [-2, 2, 2], // Efecto espejo con escala negativa en X
+        offsetPosicion: { x: -0.5, y: -1, z: 0 } 
+      }
+    },
+    {
+      modelo: "assets/models/personajes/alumno3/alumno3.gltf",
+      sillaIndex: 3,
+      opciones: { 
+        escala: [2, 2, 2], 
+        offsetPosicion: { x: -0.5, y: -1, z: -0.1 } 
+      }
+    },
+    {
+      modelo: "assets/models/personajes/alumno4/alumno4.gltf",
+      sillaIndex: 4,
+      opciones: { 
+        escala: [2, 2, 2], 
+        offsetPosicion: { x: -0.5, y: -1, z: 0 } 
+      }
+    },
+    {
+      modelo: "assets/models/personajes/alumno5/alumno5.gltf",
+      sillaIndex: 5,
+      opciones: { 
+        escala: [2, 2, 2], 
+        offsetPosicion: { x: -0.5, y: -1, z: 0 } 
+      }
+    }
+  ];
+
+  // Cargar todos los alumnos usando la función reutilizable
+  alumnos.forEach(alumno => {
+    if (posicionesSillas[alumno.sillaIndex]) {
+      cargarAlumno(
+        loader, 
+        escena, 
+        alumno.modelo, 
+        posicionesSillas[alumno.sillaIndex], 
+        alumno.opciones
+      );
+    }
   });
 
   /****** Cargar Pizarra ******/
@@ -281,7 +376,7 @@ function crearObjetos(escena) {
 
   // --- Modificar la función de carga ---
   loader.load(
-    "assets/models/personajes/Profesor.glb",
+    "assets/models/personajes/profesor/Profesor.glb",
     function (gltf) {
       const profesor = gltf.scene;
 
@@ -307,6 +402,13 @@ function crearObjetos(escena) {
         // animations["t-pose"].stop();
       }
 
+      // Desactivar frustum culling para que el profesor siempre sea visible
+      profesor.traverse((child) => {
+        if (child.isMesh) {
+          child.frustumCulled = false; // Desactivar culling - siempre visible
+        }
+      });
+
       escena.add(profesor);
     },
     undefined,
@@ -316,4 +418,18 @@ function crearObjetos(escena) {
   );
 }
 
-export { crearObjetos, animations, mixer };
+// Función para actualizar todas las animaciones
+function actualizarAnimaciones(deltaTime) {
+  if (mixer) {
+    mixer.update(deltaTime);
+  }
+  
+  // Actualizar animaciones de los alumnos
+  if (window.alumnoMixers) {
+    window.alumnoMixers.forEach(alumnoMixer => {
+      alumnoMixer.update(deltaTime);
+    });
+  }
+}
+
+export { crearObjetos, animations, mixer, actualizarAnimaciones };

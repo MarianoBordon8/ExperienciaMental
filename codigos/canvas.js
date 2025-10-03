@@ -1,5 +1,5 @@
 // codigos/canvas.js
-import { crearObjetos, animations, mixer } from "./objetos.js";
+import { crearObjetos, animations, mixer, actualizarAnimaciones } from "./objetos.js";
 import { crearCartelInstrucciones, setEtiquetaC } from "./cartelInstrucciones.js";
 import { crearHabitacion } from "./habitacion.js";
 import { crearTelevisor } from "./televisor.js";
@@ -131,7 +131,7 @@ function CrearCanvas(idOpcionPersonaje) {
   const loop = (t) => {
     // delta (para mixer)
     const dt = clock.getDelta();
-    if (mixer) mixer.update(dt);
+    actualizarAnimaciones(dt);
 
     // actualizaciones de UI/objetos
     televisor.actualizarVisibilidad?.();
