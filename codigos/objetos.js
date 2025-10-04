@@ -4,6 +4,9 @@ import { GLTFLoader } from "../libs/GLTFLoader.js";
 let mixer;
 const animations = {};
 
+// Bandera para controlar si ya sonó la campana escolar
+let campanaYaSono = false;
+
 // Función reutilizable para cargar alumnos
 function cargarAlumno(loader, escena, rutaModelo, sillaPos, opciones = {}) {
   const {
@@ -41,8 +44,6 @@ function cargarAlumno(loader, escena, rutaModelo, sillaPos, opciones = {}) {
           alumnoAnimations[clip.name] = action;
         });
 
-        console.log("Animaciones del alumno:", alumnoAnimations);
-
         if (alumnoAnimations["sitting"]) {
           alumnoAnimations["sitting"].play();
         }
@@ -67,8 +68,9 @@ function cargarAlumno(loader, escena, rutaModelo, sillaPos, opciones = {}) {
   );
 }
 
-function crearObjetos(escena) {
+function crearObjetos(escena, personajeSeleccionado = null) {
   console.log("Creando objetos...");
+  console.log("[Objetos] Personaje seleccionado:", personajeSeleccionado);
   const loadingManager = new THREE.LoadingManager();
   const loader = new GLTFLoader(loadingManager);
 
@@ -96,23 +98,32 @@ function crearObjetos(escena) {
         mensaje.textContent = "¡Listo! Bienvenido al aula";
       }
 
-      // Reproducir sonido de campana
-      schoolBell
-        .play()
-        .then(() => {
-          console.log("Reproduciendo campana escolar");
-        })
-        .catch((error) => {
-          console.log("Error al reproducir audio:", error);
-          // Si falla el audio, ocultar pantalla inmediatamente
-          ocultarPantallaCarga();
-        });
+      // Solo reproducir la campana si no ha sonado antes
+      if (!campanaYaSono) {
+        console.log("[Campana] Reproduciendo por primera vez");
+        campanaYaSono = true; // Marcar que ya sonó
+        
+        schoolBell
+          .play()
+          .then(() => {
+            console.log("Reproduciendo campana escolar");
+          })
+          .catch((error) => {
+            console.log("Error al reproducir audio:", error);
+            // Si falla el audio, ocultar pantalla inmediatamente
+            ocultarPantallaCarga();
+          });
 
-      // Esperar a que termine el audio (3 segundos) para ocultar la pantalla
-      schoolBell.addEventListener("ended", ocultarPantallaCarga);
+        // Esperar a que termine el audio (3 segundos) para ocultar la pantalla
+        schoolBell.addEventListener("ended", ocultarPantallaCarga);
 
-      // Fallback: si por alguna razón el evento 'ended' no se dispara
-      setTimeout(ocultarPantallaCarga, 3500);
+        // Fallback: si por alguna razón el evento 'ended' no se dispara
+        setTimeout(ocultarPantallaCarga, 3500);
+      } else {
+        console.log("[Campana] Ya sonó anteriormente, omitiendo reproducción");
+        // Si ya sonó, ocultar pantalla inmediatamente
+        ocultarPantallaCarga();
+      }
     } else {
       // Si no se encuentra el audio o la pantalla, ocultar inmediatamente
       ocultarPantallaCarga();
@@ -256,14 +267,6 @@ function crearObjetos(escena) {
       }
     },
     {
-      modelo: "assets/models/personajes/prueba/alumno2.gltf",
-      sillaIndex: 2,
-      opciones: { 
-        escala: [-2, 2, 2], // Efecto espejo con escala negativa en X
-        offsetPosicion: { x: -0.5, y: -1, z: 0 } 
-      }
-    },
-    {
       modelo: "assets/models/personajes/alumno3/alumno3.gltf",
       sillaIndex: 3,
       opciones: { 
@@ -374,7 +377,134 @@ function crearObjetos(escena) {
     }
   );
 
-  // --- Modificar la función de carga ---
+  // === MONSTRUO: Solo para Mario, aparece con susurro3.mp3 ===
+  if (personajeSeleccionado === "Mario") {
+    console.log("[Monstruo] Configurando eventos para susurro3.mp3...");
+
+    // Función para crear el monstruo cuando se reproduzca susurro3
+    function crearMonstruo() {
+      // Evitar crear múltiples monstruos
+      if (window.monstruoActual) {
+        console.log("[Monstruo] Ya existe un monstruo, no se crea otro");
+        return;
+      }
+
+      console.log("[Monstruo] Creando monstruo...");
+      loader.load(
+        "assets/models/personajes/monstruo/monstruo1.gltf",
+        function (gltf) {
+          const monstruo = gltf.scene;
+
+          // Posición inicial: cerca de la pizarra (frente)
+          const posicionInicial = { x: 0, y: -2, z: 8 }; // Cerca de la pizarra
+          const posicionFinal = { x: 0, y: -2, z: -10 };  // Hacia la pared opuesta
+          
+          monstruo.position.set(posicionInicial.x, posicionInicial.y, posicionInicial.z);
+          monstruo.scale.set(2, 2, 2);
+          monstruo.rotation.y = Math.PI; // Mirando hacia la pared opuesta
+
+          // Configurar animaciones del monstruo
+          if (gltf.animations && gltf.animations.length) {
+            const monstruoMixer = new THREE.AnimationMixer(monstruo);
+            const monstruoAnimations = {};
+
+            gltf.animations.forEach((clip) => {
+              const action = monstruoMixer.clipAction(clip);
+              monstruoAnimations[clip.name] = action;
+            });
+
+            // Reproducir la animación "run" en loop
+            if (monstruoAnimations["run"]) {
+              monstruoAnimations["run"].setLoop(THREE.LoopRepeat);
+              monstruoAnimations["run"].play();
+              console.log("[Monstruo] Animación 'run' iniciada");
+            }
+
+            window.monstruoMixer = monstruoMixer;
+          }
+
+          // Configurar movimiento del monstruo
+          const velocidad = 6; // Unidades por segundo (aumentado para más velocidad)
+          const distanciaTotal = posicionInicial.z - posicionFinal.z;
+          const tiempoTotal = distanciaTotal / velocidad;
+          
+          // Variables para el movimiento
+          let tiempoTranscurrido = 0;
+          window.monstruoMovimiento = {
+            activo: true,
+            posicionInicial: posicionInicial,
+            posicionFinal: posicionFinal,
+            tiempoTotal: tiempoTotal,
+            tiempoTranscurrido: 0
+          };
+
+          console.log(`[Monstruo] Configurado movimiento: ${distanciaTotal} unidades en ${tiempoTotal.toFixed(2)} segundos`);
+
+          // Desactivar frustum culling
+          monstruo.traverse((child) => {
+            if (child.isMesh) {
+              child.frustumCulled = false;
+            }
+          });
+
+          window.monstruoActual = monstruo;
+          escena.add(monstruo);
+          console.log("[Monstruo] Aparece corriendo desde la pizarra hacia atrás");
+        },
+        undefined,
+        function (error) {
+          console.error("Error cargando el monstruo:", error);
+        }
+      );
+    }
+
+    // Función para eliminar el monstruo cuando termine susurro3
+    function eliminarMonstruo() {
+      if (window.monstruoActual) {
+        escena.remove(window.monstruoActual);
+        window.monstruoActual = null;
+        window.monstruoMixer = null;
+        window.monstruoMovimiento = null;
+        console.log("[Monstruo] Desaparece al terminar susurro3");
+      }
+    }
+
+    // Configurar eventos para susurro3.mp3
+    // Intentamos encontrar el audio por diferentes métodos
+    setTimeout(() => {
+      // Buscar por src que contenga susurro3
+      let susurro3Audio = Array.from(document.querySelectorAll('audio')).find(audio => 
+        audio.src && audio.src.includes('susurro3.mp3')
+      );
+
+      if (susurro3Audio) {
+        susurro3Audio.addEventListener('play', crearMonstruo);
+        susurro3Audio.addEventListener('ended', eliminarMonstruo);
+        console.log("[Monstruo] Eventos configurados para susurro3.mp3");
+      } else {
+        console.warn("[Monstruo] No se encontró el audio susurro3.mp3");
+        // Crear el audio si no existe y configurarlo
+        susurro3Audio = document.createElement('audio');
+        susurro3Audio.src = 'assets/sounds/susurro3.mp3';
+        susurro3Audio.addEventListener('play', crearMonstruo);
+        susurro3Audio.addEventListener('ended', eliminarMonstruo);
+        document.body.appendChild(susurro3Audio);
+        console.log("[Monstruo] Audio susurro3.mp3 creado y eventos configurados");
+      }
+
+      // También escuchar el evento global personalizado si el sistema de esquizofrenia lo dispara
+      window.addEventListener('susurro3-start', crearMonstruo);
+      window.addEventListener('susurro3-end', eliminarMonstruo);
+    }, 1000); // Delay para asegurar que el DOM esté listo
+
+  } else {
+    console.log(`[Objetos] NO se carga monstruo para ${personajeSeleccionado || 'personaje no especificado'}. Solo para Mario (esquizofrenia).`);
+  }
+
+
+
+
+// --- Modificar la función de carga ---
   loader.load(
     "assets/models/personajes/profesor/Profesor.glb",
     function (gltf) {
@@ -416,7 +546,7 @@ function crearObjetos(escena) {
       console.error("Error cargando el profesor:", error);
     }
   );
-}
+} // Cerrar función crearObjetos
 
 // Función para actualizar todas las animaciones
 function actualizarAnimaciones(deltaTime) {
@@ -430,6 +560,38 @@ function actualizarAnimaciones(deltaTime) {
       alumnoMixer.update(deltaTime);
     });
   }
+  
+  // Actualizar animación del monstruo
+  if (window.monstruoMixer) {
+    window.monstruoMixer.update(deltaTime);
+  }
+  
+  // Actualizar movimiento del monstruo
+  if (window.monstruoMovimiento && window.monstruoMovimiento.activo && window.monstruoActual) {
+    const mov = window.monstruoMovimiento;
+    mov.tiempoTranscurrido += deltaTime;
+    
+    // Calcular progreso (0 a 1)
+    const progreso = Math.min(mov.tiempoTranscurrido / mov.tiempoTotal, 1);
+    
+    // Interpolación lineal para la posición Z
+    const nuevaZ = mov.posicionInicial.z + (mov.posicionFinal.z - mov.posicionInicial.z) * progreso;
+    
+    // Actualizar posición del monstruo
+    window.monstruoActual.position.z = nuevaZ;
+    
+    // Si llegó al final, desactivar movimiento
+    if (progreso >= 1) {
+      mov.activo = false;
+      console.log("[Monstruo] Completó el recorrido desde la pizarra hasta atrás");
+    }
+  }
 }
 
-export { crearObjetos, animations, mixer, actualizarAnimaciones };
+// Función para resetear la bandera de la campana (llamar al volver al menú)
+function resetearCampana() {
+  campanaYaSono = false;
+  console.log("[Campana] Bandera reseteada - volverá a sonar en la próxima carga");
+}
+
+export { crearObjetos, animations, mixer, actualizarAnimaciones, resetearCampana };

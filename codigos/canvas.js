@@ -7,10 +7,10 @@ import { crearExamen } from "./examen.js";
 import { manejarEventosTeclado } from "./eventosTeclado.js";
 import { crearMovimientoCamara } from "./movimientoCamara.js";
 
-// Experiencias
-import { inicializarSistemaDislexia } from "./enfermedades/dislexia.js";
-import { activarSistemaEsquizofrenia } from "./enfermedades/esquizofrenia.js";
-import { activarSistemaAnsiedad } from "./enfermedades/ansiedad.js";
+// Experiencias: TODAS se cargan dinámicamente según el personaje seleccionado
+// import { inicializarSistemaDislexia } from "./enfermedades/dislexia.js"; // ← Ahora se carga dinámicamente
+// import { activarSistemaEsquizofrenia} from "./enfermedades/esquizofrenia.js"; // ← Ahora se carga dinámicamente
+// import { activarSistemaAnsiedad } from "./enfermedades/ansiedad.js"; // ← Ahora se carga dinámicamente
 
 /* ================== Utils ================== */
 function etiquetaPorEnfermedad(enf) {
@@ -67,16 +67,17 @@ function createOptimizedRenderer(canvas) {
 }
 
 /* ================== CrearCanvas ================== */
-function CrearCanvas(idOpcionPersonaje) {
+async function CrearCanvas(idOpcionPersonaje) {
   console.log("[Canvas] Personaje:", idOpcionPersonaje);
 
   // --- Escena ---
   const escena = new THREE.Scene();
   escena.background = new THREE.Color("#48bfeb");
 
+
   // --- Mundo base ---
   crearHabitacion(escena);
-  crearObjetos(escena);
+  crearObjetos(escena, idOpcionPersonaje); // 👻 Pasar personaje para control de monstruo
   crearCartelInstrucciones();
 
   // --- Interactivos comunes ---
@@ -100,19 +101,35 @@ function CrearCanvas(idOpcionPersonaje) {
   // --- Mirada (rotación) ---
   const movimiento = crearMovimientoCamara(camara, renderizador);
 
-  // --- Selección de experiencia (init; ON/OFF con tecla C) ---
+  // --- Selección de experiencia: CARGA DINÁMICA (init; ON/OFF con tecla C) ---
   let enfermedad = null;
+  
   if (idOpcionPersonaje === "Juan") {
     enfermedad = "dislexia";
+    console.log("[Canvas] Cargando dislexia dinámicamente SOLO para Juan...");
+    
+    // ✨ CARGA DINÁMICA: Solo se carga si es Juan
+    const { inicializarSistemaDislexia } = await import("./enfermedades/dislexia.js");
     inicializarSistemaDislexia(televisor, examen, idOpcionPersonaje);
+    
   } else if (idOpcionPersonaje === "Mario") {
     enfermedad = "esquizofrenia";
+    console.log("[Canvas] Cargando esquizofrenia dinámicamente SOLO para Mario...");
+    
+    // ✨ CARGA DINÁMICA: Solo se carga si es Mario
+    const { activarSistemaEsquizofrenia } = await import("./enfermedades/esquizofrenia.js");
     activarSistemaEsquizofrenia(); // solo init
+    
   } else if (idOpcionPersonaje === "Franco") {
     enfermedad = "ansiedad";
+    console.log("[Canvas] Cargando ansiedad dinámicamente SOLO para Franco...");
+    
+    // ✨ CARGA DINÁMICA: Solo se carga si es Franco
+    const { activarSistemaAnsiedad } = await import("./enfermedades/ansiedad.js");
     activarSistemaAnsiedad(); // solo init (audio + nodos), play con C
+    
   } else {
-    console.warn("[Canvas] Personaje no reconocido.");
+    console.warn("[Canvas] Personaje no reconocido. Solo escena básica.");
   }
 
   // Actualizar cartel “C = …”

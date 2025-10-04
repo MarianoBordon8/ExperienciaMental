@@ -1,6 +1,10 @@
 // Sistema de audio estéreo para efectos auditivos de esquizofrenia
 // Unificado: NO auto-arranca. Todo se controla con la tecla C (toggleEsquizofrenia).
 
+import { GLTFLoader } from "../../libs/GLTFLoader.js";
+
+let personajeSeleccionado = null; // Control de personaje para verificar si es Mario
+
 let audioContext = null;
 let susurroAudios = [];   // <audio> por pista
 let susurroSources = [];  // MediaElementSource por pista
@@ -120,6 +124,21 @@ function reproducirAudio(audioElement, indice) {
   if (!audioElement.paused) audioElement.currentTime = 0;
 
   console.log(`[Esquizofrenia] play pista #${indice+1}`);
+  
+  // Si es susurro3 (índice 2), disparar evento para el monstruo
+  if (indice === 2) { // susurro3.mp3
+    console.log("[Esquizofrenia] Reproduciendo susurro3 - disparando evento para monstruo");
+    window.dispatchEvent(new Event('susurro3-start'));
+    
+    // Configurar evento para cuando termine
+    const onEndedHandler = () => {
+      console.log("[Esquizofrenia] Susurro3 terminó - disparando evento para ocultar monstruo");
+      window.dispatchEvent(new Event('susurro3-end'));
+      audioElement.removeEventListener('ended', onEndedHandler);
+    };
+    audioElement.addEventListener('ended', onEndedHandler);
+  }
+  
   audioElement.play().catch(e => {
     console.warn("[Esquizofrenia] play() bloqueado por el navegador:", e);
   });
@@ -240,6 +259,10 @@ function desactivarSistemaEsquizofrenia() {
 }
 
 function isAutoOn() { return isAutoPlayActive; }
+
+
+
+
 
 // Exports
 export {

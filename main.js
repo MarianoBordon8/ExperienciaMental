@@ -147,7 +147,7 @@ async function startSim(personajeId) {
 }
 
 /* =============== Salir al menú (botón o Esc) =============== */
-function exitToMenu() {
+async function exitToMenu() {
   if (game) { game.style.visibility = "hidden"; game.style.display = "none"; }
   try { currentCanvas?.destroy?.(); } catch (e) { console.warn(e); }
   currentCanvas = null;
@@ -155,6 +155,14 @@ function exitToMenu() {
   pantallaCarga?.classList.remove("visible", "fade-out");
   document.getElementById("cartelInstrucciones")?.remove();
   exitBtn?.remove(); exitBtn = null;
+
+  // Resetear la bandera de la campana al volver al menú
+  try {
+    const { resetearCampana } = await import("./codigos/objetos.js");
+    resetearCampana();
+  } catch (e) {
+    console.warn("[main] Error al resetear campana:", e);
+  }
 
   if (HARD_RESET) {
     document.body.classList.remove("no-scroll");
