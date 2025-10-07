@@ -1,6 +1,14 @@
 // codigos/canvas.js
-import { crearObjetos, animations, mixer, actualizarAnimaciones } from "./objetos.js";
-import { crearCartelInstrucciones, setEtiquetaC } from "./cartelInstrucciones.js";
+import {
+  crearObjetos,
+  animations,
+  mixer,
+  actualizarAnimaciones,
+} from "./objetos.js";
+import {
+  crearCartelInstrucciones,
+  setEtiquetaC,
+} from "./cartelInstrucciones.js";
 import { crearHabitacion } from "./habitacion.js";
 import { crearTelevisor } from "./televisor.js";
 import { crearExamen } from "./examen.js";
@@ -15,10 +23,14 @@ import { crearMovimientoCamara } from "./movimientoCamara.js";
 /* ================== Utils ================== */
 function etiquetaPorEnfermedad(enf) {
   switch (enf) {
-    case "dislexia":       return "Dislexia ON/OFF";
-    case "esquizofrenia":  return "Esquizofrenia ON/OFF";
-    case "ansiedad":       return "Ansiedad ON/OFF";
-    default:               return "ON/OFF";
+    case "dislexia":
+      return "Dislexia ON/OFF";
+    case "esquizofrenia":
+      return "Esquizofrenia ON/OFF";
+    case "ansiedad":
+      return "Ansiedad ON/OFF";
+    default:
+      return "ON/OFF";
   }
 }
 
@@ -43,7 +55,7 @@ function disposeObject(obj) {
 function createOptimizedRenderer(canvas) {
   const renderer = new THREE.WebGLRenderer({
     canvas,
-    antialias: false,                 // mejor perf. (activar si lo necesitás)
+    antialias: false, // mejor perf. (activar si lo necesitás)
     powerPreference: "high-performance",
     alpha: false,
     stencil: false,
@@ -74,7 +86,6 @@ async function CrearCanvas(idOpcionPersonaje) {
   const escena = new THREE.Scene();
   escena.background = new THREE.Color("#48bfeb");
 
-
   // --- Mundo base ---
   crearHabitacion(escena);
   crearObjetos(escena, idOpcionPersonaje); // 👻 Pasar personaje para control de monstruo
@@ -82,10 +93,13 @@ async function CrearCanvas(idOpcionPersonaje) {
 
   // --- Interactivos comunes ---
   const televisor = crearTelevisor(escena, idOpcionPersonaje);
-  const examen    = crearExamen(escena);
+  const examen = crearExamen(escena);
 
   // --- Cámara fija (alumno) ---
-  const fov = 75, aspect = window.innerWidth / window.innerHeight, near = 0.1, far = 1000;
+  const fov = 75,
+    aspect = window.innerWidth / window.innerHeight,
+    near = 0.1,
+    far = 1000;
   const camara = new THREE.PerspectiveCamera(fov, aspect, near, far);
   camara.position.set(-2.5, 1, -1);
   camara.rotation.y = Math.PI;
@@ -95,39 +109,48 @@ async function CrearCanvas(idOpcionPersonaje) {
   const renderizador = createOptimizedRenderer(canvasEl);
 
   // --- Luz ---
-  const luzAmbiente = new THREE.AmbientLight(0xffffff, 1.1);
+  const luzAmbiente = new THREE.AmbientLight(0xffffff, 0.1);
   escena.add(luzAmbiente);
+
+  const luzTecho = new THREE.PointLight(0xffffff, 1, 90, 2); // Color Blanco, intensity 1, 100 units distance, decay 2
+  luzTecho.position.set(0, 3, 0);
+  escena.add(luzTecho);
 
   // --- Mirada (rotación) ---
   const movimiento = crearMovimientoCamara(camara, renderizador);
 
   // --- Selección de experiencia: CARGA DINÁMICA (init; ON/OFF con tecla C) ---
   let enfermedad = null;
-  
+
   if (idOpcionPersonaje === "Juan") {
     enfermedad = "dislexia";
     console.log("[Canvas] Cargando dislexia dinámicamente SOLO para Juan...");
-    
+
     // ✨ CARGA DINÁMICA: Solo se carga si es Juan
-    const { inicializarSistemaDislexia } = await import("./enfermedades/dislexia.js");
+    const { inicializarSistemaDislexia } = await import(
+      "./enfermedades/dislexia.js"
+    );
     inicializarSistemaDislexia(televisor, examen, idOpcionPersonaje);
-    
   } else if (idOpcionPersonaje === "Mario") {
     enfermedad = "esquizofrenia";
-    console.log("[Canvas] Cargando esquizofrenia dinámicamente SOLO para Mario...");
-    
+    console.log(
+      "[Canvas] Cargando esquizofrenia dinámicamente SOLO para Mario..."
+    );
+
     // ✨ CARGA DINÁMICA: Solo se carga si es Mario
-    const { activarSistemaEsquizofrenia } = await import("./enfermedades/esquizofrenia.js");
+    const { activarSistemaEsquizofrenia } = await import(
+      "./enfermedades/esquizofrenia.js"
+    );
     activarSistemaEsquizofrenia(); // solo init
-    
   } else if (idOpcionPersonaje === "Franco") {
     enfermedad = "ansiedad";
     console.log("[Canvas] Cargando ansiedad dinámicamente SOLO para Franco...");
-    
+
     // ✨ CARGA DINÁMICA: Solo se carga si es Franco
-    const { activarSistemaAnsiedad } = await import("./enfermedades/ansiedad.js");
+    const { activarSistemaAnsiedad } = await import(
+      "./enfermedades/ansiedad.js"
+    );
     activarSistemaAnsiedad(); // solo init (audio + nodos), play con C
-    
   } else {
     console.warn("[Canvas] Personaje no reconocido. Solo escena básica.");
   }
@@ -142,7 +165,9 @@ async function CrearCanvas(idOpcionPersonaje) {
   const clock = new THREE.Clock();
 
   // --- Loop con auto-escala de resolución (DPR) según FPS ---
-  let lastT = 0, frames = 0, accum = 0;
+  let lastT = 0,
+    frames = 0,
+    accum = 0;
   const PERF_WINDOW_MS = 1200; // cada ~1.2s ajusta DPR
 
   const loop = (t) => {
@@ -178,7 +203,8 @@ async function CrearCanvas(idOpcionPersonaje) {
           // ajustar tamaño real manteniendo CSS pixel ratio
           renderizador.setSize(window.innerWidth, window.innerHeight, false);
         }
-        frames = 0; accum = 0;
+        frames = 0;
+        accum = 0;
       }
     }
     lastT = t;
@@ -187,7 +213,7 @@ async function CrearCanvas(idOpcionPersonaje) {
   // --- Iniciar animación y pausar si la pestaña no está visible ---
   const onVis = () => {
     if (document.hidden) renderizador.setAnimationLoop(null);
-    else                 renderizador.setAnimationLoop(loop);
+    else renderizador.setAnimationLoop(loop);
   };
   document.addEventListener("visibilitychange", onVis);
   renderizador.setAnimationLoop(loop);
@@ -211,12 +237,20 @@ async function CrearCanvas(idOpcionPersonaje) {
       document.removeEventListener("visibilitychange", onVis);
 
       // cleanup de módulos auxiliares si exponen destroy()
-      try { movimiento?.destroy?.(); } catch {}
+      try {
+        movimiento?.destroy?.();
+      } catch {}
 
       // liberar recursos de la escena y renderer
-      try { disposeObject(escena); } catch {}
-      try { renderizador.dispose(); } catch {}
-      try { renderizador.forceContextLoss?.(); } catch {}
+      try {
+        disposeObject(escena);
+      } catch {}
+      try {
+        renderizador.dispose();
+      } catch {}
+      try {
+        renderizador.forceContextLoss?.();
+      } catch {}
 
       console.log("[Canvas] destroy()");
     },

@@ -7,10 +7,16 @@
     <title>Empathy Lab</title>
 
     <!-- Fuentes / iconos -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;800;900&display=swap" rel="stylesheet"/>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
 
     <!-- Estilos base -->
     <link rel="stylesheet" href="landing.css" />
@@ -23,30 +29,70 @@
     <!-- Ajustes UX/scroll + blindajes -->
     <style>
       /* Solo scroll vertical en la landing */
-      html { scroll-behavior: smooth; overflow-x: hidden; }
-      body { overflow-y: auto !important; overflow-x: hidden !important; }
-      body.no-scroll { overflow: hidden !important; } /* solo mientras corre el simulador */
+      html {
+        scroll-behavior: smooth;
+        overflow-x: hidden;
+      }
+      body {
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+      }
+      body.no-scroll {
+        overflow: hidden !important;
+      } /* solo mientras corre el simulador */
 
-      #experiencias, #como-jugar, #objetivos, #sobre { scroll-margin-top: 80px; }
+      #experiencias,
+      #como-jugar,
+      #objetivos,
+      #sobre {
+        scroll-margin-top: 80px;
+      }
 
       /* Reveal on scroll */
-      .reveal { opacity: 0; transform: translateY(18px); transition: opacity .6s ease, transform .6s ease; }
-      .reveal.in { opacity: 1; transform: none; }
+      .reveal {
+        opacity: 0;
+        transform: translateY(18px);
+        transition: opacity 0.6s ease, transform 0.6s ease;
+      }
+      .reveal.in {
+        opacity: 1;
+        transform: none;
+      }
 
       /* Blindaje visual al salir */
-      body.exiting .threejsCanvas { display: none !important; visibility: hidden !important; opacity: 0 !important; }
+      body.exiting .threejsCanvas {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+      }
 
       /* Respeto a usuarios con “reducir movimiento” */
       @media (prefers-reduced-motion: reduce) {
-        .hero__bg, .exp-card { animation: none !important; transition: none !important; }
+        .hero__bg,
+        .exp-card {
+          animation: none !important;
+          transition: none !important;
+        }
       }
 
       /* Botón salir por encima de la pantalla de carga */
-      .btn-exit{ position: fixed; top: 14px; left: 14px; z-index: 10050; border-radius: 10px; padding: 10px 14px; opacity: .98; }
-      .btn-exit:hover{ opacity: 1; }
+      .btn-exit {
+        position: fixed;
+        top: 14px;
+        left: 14px;
+        z-index: 10050;
+        border-radius: 10px;
+        padding: 10px 14px;
+        opacity: 0.98;
+      }
+      .btn-exit:hover {
+        opacity: 1;
+      }
 
       /* La pantalla de carga no bloquea clics al botón que va por encima */
-      .pantalla-carga { pointer-events: none; }
+      .pantalla-carga {
+        pointer-events: none;
+      }
     </style>
   </head>
 
@@ -68,7 +114,11 @@
           <a href="#como-jugar">Cómo jugar</a>
           <a href="#objetivos">Objetivos</a>
           <a href="#sobre">Sobre el proyecto</a>
-          <a href="https://github.com/MarianoBordon8/ExperienciaMental" target="_blank" rel="noopener">
+          <a
+            href="https://github.com/MarianoBordon8/ExperienciaMental"
+            target="_blank"
+            rel="noopener"
+          >
             <i class="fa fa-github"></i> GitHub
           </a>
         </nav>
@@ -80,7 +130,8 @@
           <div class="hero__copy">
             <h1 class="hero__title">Empathy <span>Lab</span></h1>
             <p class="hero__lead">
-              Una experiencia 3D interactiva para comprender distintas formas de percibir una clase.
+              Una experiencia 3D interactiva para comprender distintas formas de
+              percibir una clase.
             </p>
 
             <div class="hero__chips" aria-hidden="true">
@@ -90,7 +141,9 @@
             </div>
 
             <div class="hero__cta">
-              <a href="#experiencias" class="btn btn--primary">Entrar al simulador</a>
+              <a href="#experiencias" class="btn btn--primary"
+                >Entrar al simulador</a
+              >
               <a href="#sobre" class="btn btn--ghost">Saber más</a>
             </div>
           </div>
@@ -104,7 +157,9 @@
                 <span class="dot dot--green"></span>
                 <span class="panel__title">Nuestro propósito</span>
               </div>
-              <pre class="panel__body"><code class="demo" aria-label="Nuestro propósito"></code></pre>
+              <pre
+                class="panel__body"
+              ><code class="demo" aria-label="Nuestro propósito"></code></pre>
               <div class="panel__footer" aria-hidden="true">
                 <span class="badge">Empatía</span>
                 <span class="badge">Accesibilidad</span>
@@ -118,8 +173,13 @@
         <div class="hero__bg" aria-hidden="true"></div>
 
         <!-- Indicador de scroll centrado -->
-        <a class="scroll-indicator" href="#experiencias" aria-label="Bajar a Experiencias">
-          <span class="chevron"></span><span class="chevron"></span><span class="chevron"></span>
+        <a
+          class="scroll-indicator"
+          href="#experiencias"
+          aria-label="Bajar a Experiencias"
+        >
+          <span class="chevron"></span><span class="chevron"></span
+          ><span class="chevron"></span>
         </a>
       </section>
 
@@ -130,48 +190,75 @@
           <!-- JUAN -->
           <article class="exp-card reveal">
             <div class="exp-card__media">
-              <img alt="Juan — Dislexia" loading="lazy" decoding="async"
-                src="data:image/svg+xml;utf8,<?xml version='1.0' encoding='UTF-8'?><svg xmlns='http://www.w3.org/2000/svg' width='800' height='450'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop stop-color='%2322458a' offset='0'/><stop stop-color='%230b1020' offset='1'/></linearGradient></defs><rect width='100%25' height='100%25' fill='url(%23g)'/><text x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='%23cfe4ff' font-family='Nunito Sans, Arial' font-size='36'>Juan — Dislexia</text></svg>" />
+              <img
+                alt="Juan — Dislexia"
+                loading="lazy"
+                decoding="async"
+                src="data:image/svg+xml;utf8,<?xml version='1.0' encoding='UTF-8'?><svg xmlns='http://www.w3.org/2000/svg' width='800' height='450'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop stop-color='%2322458a' offset='0'/><stop stop-color='%230b1020' offset='1'/></linearGradient></defs><rect width='100%25' height='100%25' fill='url(%23g)'/><text x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='%23cfe4ff' font-family='Nunito Sans, Arial' font-size='36'>Juan — Dislexia</text></svg>"
+              />
               <span class="exp-card__tag">Dislexia</span>
             </div>
             <div class="exp-card__body">
               <h3>Juan</h3>
-              <p>Lectura con esfuerzo (texto vibrante, saltos, desenfoque intermitente). Televisor con material adaptado.</p>
+              <p>
+                Lectura con esfuerzo (texto vibrante, saltos, desenfoque
+                intermitente). Televisor con material adaptado.
+              </p>
             </div>
             <div class="exp-card__actions">
-              <button class="btn btn--secondary start-sim" data-id="Juan">Elegir Juan</button>
+              <button class="btn btn--secondary start-sim" data-id="Juan">
+                Elegir Juan
+              </button>
             </div>
           </article>
 
           <!-- MARIO -->
           <article class="exp-card reveal">
             <div class="exp-card__media">
-              <img alt="Mario — Esquizofrenia" loading="lazy" decoding="async"
-                src="data:image/svg+xml;utf8,<?xml version='1.0' encoding='UTF-8'?><svg xmlns='http://www.w3.org/2000/svg' width='800' height='450'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop stop-color='%23174b3a' offset='0'/><stop stop-color='%230b1020' offset='1'/></linearGradient></defs><rect width='100%25' height='100%25' fill='url(%23g)'/><text x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='%23d9ffe8' font-family='Nunito Sans, Arial' font-size='36'>Mario — Esquizofrenia</text></svg>" />
+              <img
+                alt="Mario — Esquizofrenia"
+                loading="lazy"
+                decoding="async"
+                src="data:image/svg+xml;utf8,<?xml version='1.0' encoding='UTF-8'?><svg xmlns='http://www.w3.org/2000/svg' width='800' height='450'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop stop-color='%23174b3a' offset='0'/><stop stop-color='%230b1020' offset='1'/></linearGradient></defs><rect width='100%25' height='100%25' fill='url(%23g)'/><text x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='%23d9ffe8' font-family='Nunito Sans, Arial' font-size='36'>Mario — Esquizofrenia</text></svg>"
+              />
               <span class="exp-card__tag">Esquizofrenia</span>
             </div>
             <div class="exp-card__body">
               <h3>Mario</h3>
-              <p>Susurros espaciales (HRTF) que aparecen de forma impredecible. Control total con tecla <strong>C</strong>.</p>
+              <p>
+                Susurros espaciales (HRTF) que aparecen de forma impredecible.
+                Control total con tecla <strong>C</strong>.
+              </p>
             </div>
             <div class="exp-card__actions">
-              <button class="btn btn--secondary start-sim" data-id="Mario">Elegir Mario</button>
+              <button class="btn btn--secondary start-sim" data-id="Mario">
+                Elegir Mario
+              </button>
             </div>
           </article>
 
           <!-- FRANCO -->
           <article class="exp-card reveal">
             <div class="exp-card__media">
-              <img alt="Franco — Ansiedad" loading="lazy" decoding="async"
-                src="data:image/svg+xml;utf8,<?xml version='1.0' encoding='UTF-8'?><svg xmlns='http://www.w3.org/2000/svg' width='800' height='450'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop stop-color='%23386bff' offset='0'/><stop stop-color='%230b1020' offset='1'/></linearGradient></defs><rect width='100%25' height='100%25' fill='url(%23g)'/><text x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='%23cfe4ff' font-family='Nunito Sans, Arial' font-size='36'>Franco — Ansiedad</text></svg>" />
+              <img
+                alt="Franco — Ansiedad"
+                loading="lazy"
+                decoding="async"
+                src="data:image/svg+xml;utf8,<?xml version='1.0' encoding='UTF-8'?><svg xmlns='http://www.w3.org/2000/svg' width='800' height='450'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop stop-color='%23386bff' offset='0'/><stop stop-color='%230b1020' offset='1'/></linearGradient></defs><rect width='100%25' height='100%25' fill='url(%23g)'/><text x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='%23cfe4ff' font-family='Nunito Sans, Arial' font-size='36'>Franco — Ansiedad</text></svg>"
+              />
               <span class="exp-card__tag">Ansiedad</span>
             </div>
             <div class="exp-card__body">
               <h3>Franco</h3>
-              <p>Pulso visual (zoom/vignette) sincronizado a latidos + respiración. Profesor reacciona con animaciones.</p>
+              <p>
+                Pulso visual (zoom/vignette) sincronizado a latidos +
+                respiración. Profesor reacciona con animaciones.
+              </p>
             </div>
             <div class="exp-card__actions">
-              <button class="btn btn--secondary start-sim" data-id="Franco">Elegir Franco</button>
+              <button class="btn btn--secondary start-sim" data-id="Franco">
+                Elegir Franco
+              </button>
             </div>
           </article>
         </div>
@@ -182,15 +269,24 @@
         <div class="features__grid">
           <div class="feature reveal">
             <h3>Hacer tangible la diversidad</h3>
-            <p>Explorar percepciones en clase (texto, sonido, foco atencional, carga sensorial).</p>
+            <p>
+              Explorar percepciones en clase (texto, sonido, foco atencional,
+              carga sensorial).
+            </p>
           </div>
           <div class="feature reveal">
             <h3>Decisiones con impacto</h3>
-            <p>Ajustes posibles dentro de la narrativa: regular estímulos, apoyos, turnos claros.</p>
+            <p>
+              Ajustes posibles dentro de la narrativa: regular estímulos,
+              apoyos, turnos claros.
+            </p>
           </div>
           <div class="feature reveal">
             <h3>Reflexión guiada</h3>
-            <p>Qué ayudó, qué costó y qué se podría cambiar en la práctica docente y entre pares.</p>
+            <p>
+              Qué ayudó, qué costó y qué se podría cambiar en la práctica
+              docente y entre pares.
+            </p>
           </div>
         </div>
       </section>
@@ -198,9 +294,13 @@
       <section class="howto" id="como-jugar">
         <h2 class="section__title">Cómo jugar</h2>
         <ul class="kb">
-          <li class="reveal"><span class="kbd">Click + Mouse</span> Mover cámara</li>
+          <li class="reveal">
+            <span class="kbd">Click + Mouse</span> Mover cámara
+          </li>
           <li class="reveal"><span class="kbd">P</span> Abrir parcial</li>
-          <li class="reveal"><span class="kbd">C</span> Efecto ON/OFF (según experiencia)</li>
+          <li class="reveal">
+            <span class="kbd">C</span> Efecto ON/OFF (según experiencia)
+          </li>
           <li class="reveal"><span class="kbd">Esc</span> Salir al menú</li>
         </ul>
       </section>
@@ -209,16 +309,24 @@
         <h2 class="section__title">Sobre Empathy Lab</h2>
         <p class="reveal">
           “Una clase común” en primera persona. Usuario/a sentado/a en su banco,
-          escucha, recibe consignas y participa. Control respetuoso y ético: 
-          el foco está en comprender y apoyar.
+          escucha, recibe consignas y participa. Control respetuoso y ético: el
+          foco está en comprender y apoyar.
         </p>
-        <a class="btn btn--ghost" href="No_programamos_esta_pagina_todavia">Más info</a>
+        <a class="btn btn--ghost" href="No_programamos_esta_pagina_todavia"
+          >Más info</a
+        >
       </section>
 
       <footer class="footer">
         <div class="footer__inner">
-          <span>Creado por: Nicolas Murua — Mariano Bordon — Santino Chamia</span>
-          <a href="https://github.com/MarianoBordon8/ExperienciaMental" target="_blank" rel="noopener">
+          <span
+            >Creado por: Nicolas Murua — Mariano Bordon — Santino Chamia</span
+          >
+          <a
+            href="https://github.com/MarianoBordon8/ExperienciaMental"
+            target="_blank"
+            rel="noopener"
+          >
             <i class="fa fa-github"></i> Repositorio
           </a>
         </div>
@@ -234,11 +342,13 @@
 
       <div id="pantalla-carga" class="pantalla-carga">
         <div style="color: white; font-size: 24px; text-align: center">
-          <div>Cargando objetos 3D...</div>
+          <div>
+            Cargando objetos 3D...
+            <!-- <progress id="progress-bar" value="0" max="100"></progress> -->
+          </div>
           <div style="margin-top: 20px; font-size: 18px">Por favor espera</div>
         </div>
       </div>
-
       <canvas id="miCanvas"></canvas>
       <div class="progress-bar-container">
         <label for="progress-bar">Loading...</label>
@@ -253,39 +363,51 @@
     <!-- Nav móvil, anclas suaves, reveal on scroll -->
     <script>
       // Garantiza que la landing arranque scrolleable
-      document.body.classList.remove('no-scroll');
+      document.body.classList.remove("no-scroll");
 
       // Toggle menú móvil
-      const navToggle = document.getElementById('navToggle');
-      const navMenu = document.getElementById('navMenu');
+      const navToggle = document.getElementById("navToggle");
+      const navMenu = document.getElementById("navMenu");
       if (navToggle && navMenu) {
-        navToggle.addEventListener('click', () => navMenu.classList.toggle('open'));
-        navMenu.addEventListener('click', (e) => { if (e.target.tagName === 'A') navMenu.classList.remove('open'); });
+        navToggle.addEventListener("click", () =>
+          navMenu.classList.toggle("open")
+        );
+        navMenu.addEventListener("click", (e) => {
+          if (e.target.tagName === "A") navMenu.classList.remove("open");
+        });
       }
 
       // Scroll suave programático (compatibilidad)
-      document.querySelectorAll('a[href^="#"]').forEach(a => {
-        a.addEventListener('click', (e) => {
-          const id = a.getAttribute('href').slice(1);
+      document.querySelectorAll('a[href^="#"]').forEach((a) => {
+        a.addEventListener("click", (e) => {
+          const id = a.getAttribute("href").slice(1);
           const target = document.getElementById(id);
           if (!target) return;
           e.preventDefault();
-          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          history.pushState(null, '', '#' + id);
+          target.scrollIntoView({ behavior: "smooth", block: "start" });
+          history.pushState(null, "", "#" + id);
         });
       });
 
       // Reveal on scroll
-      (function(){
-        const els = document.querySelectorAll('.reveal');
-        if (!('IntersectionObserver' in window) || !els.length) {
-          els.forEach(el => el.classList.add('in'));
+      (function () {
+        const els = document.querySelectorAll(".reveal");
+        if (!("IntersectionObserver" in window) || !els.length) {
+          els.forEach((el) => el.classList.add("in"));
           return;
         }
-        const io = new IntersectionObserver(entries => {
-          entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }});
-        }, { threshold: 0.12 });
-        els.forEach(el => io.observe(el));
+        const io = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((e) => {
+              if (e.isIntersecting) {
+                e.target.classList.add("in");
+                io.unobserve(e.target);
+              }
+            });
+          },
+          { threshold: 0.12 }
+        );
+        els.forEach((el) => io.observe(el));
       })();
     </script>
   </body>
