@@ -13,7 +13,7 @@ function cargarAlumno(loader, escena, rutaModelo, sillaPos, opciones = {}) {
     escala = [1, 1, 1],
     rotacionY = -Math.PI - 3.1,
     offsetPosicion = { x: -0.5, y: -1.8, z: 0 },
-    alturaAsiento = -0.8
+    alturaAsiento = -0.8,
   } = opciones;
 
   loader.load(
@@ -102,7 +102,7 @@ function crearObjetos(escena, personajeSeleccionado = null) {
       if (!campanaYaSono) {
         console.log("[Campana] Reproduciendo por primera vez");
         campanaYaSono = true; // Marcar que ya sonó
-        
+
         schoolBell
           .play()
           .then(() => {
@@ -228,7 +228,6 @@ function crearObjetos(escena, personajeSeleccionado = null) {
     [2, 0.25, 3], // Fila delantera
   ];
 
-
   posicionesSillas.forEach((pos) => {
     loader.load(
       "./assets/models/banco/silla/silla.gltf",
@@ -237,7 +236,6 @@ function crearObjetos(escena, personajeSeleccionado = null) {
         silla.position.set(pos[0], pos[1], pos[2]);
         silla.scale.set(1.5, 1.5, 1.5);
         escena.add(silla);
-
       },
       undefined,
       function (error) {
@@ -253,53 +251,53 @@ function crearObjetos(escena, personajeSeleccionado = null) {
     {
       modelo: "assets/models/personajes/alumno0/alumno0.gltf",
       sillaIndex: 0,
-      opciones: { 
-        escala: [1, 1, 1], 
-        offsetPosicion: { x: -0.5, y: -1, z: -0.3 } 
-      }
+      opciones: {
+        escala: [1, 1, 1],
+        offsetPosicion: { x: -0.5, y: -1, z: -0.3 },
+      },
     },
     {
       modelo: "assets/models/personajes/alumno1/alumno1.gltf",
       sillaIndex: 1,
-      opciones: { 
-        escala: [2, 2, 2], 
-        offsetPosicion: { x: -0.5, y: -1, z: 0 } 
-      }
+      opciones: {
+        escala: [2, 2, 2],
+        offsetPosicion: { x: -0.5, y: -1, z: 0 },
+      },
     },
     {
       modelo: "assets/models/personajes/alumno3/alumno3.gltf",
       sillaIndex: 3,
-      opciones: { 
-        escala: [2, 2, 2], 
-        offsetPosicion: { x: -0.5, y: -1, z: -0.1 } 
-      }
+      opciones: {
+        escala: [2, 2, 2],
+        offsetPosicion: { x: -0.5, y: -1, z: -0.1 },
+      },
     },
     {
       modelo: "assets/models/personajes/alumno4/alumno4.gltf",
       sillaIndex: 4,
-      opciones: { 
-        escala: [2, 2, 2], 
-        offsetPosicion: { x: -0.5, y: -1, z: 0 } 
-      }
+      opciones: {
+        escala: [2, 2, 2],
+        offsetPosicion: { x: -0.5, y: -1, z: 0 },
+      },
     },
     {
       modelo: "assets/models/personajes/alumno5/alumno5.gltf",
       sillaIndex: 5,
-      opciones: { 
-        escala: [2, 2, 2], 
-        offsetPosicion: { x: -0.5, y: -1, z: 0 } 
-      }
-    }
+      opciones: {
+        escala: [2, 2, 2],
+        offsetPosicion: { x: -0.5, y: -1, z: 0 },
+      },
+    },
   ];
 
   // Cargar todos los alumnos usando la función reutilizable
-  alumnos.forEach(alumno => {
+  alumnos.forEach((alumno) => {
     if (posicionesSillas[alumno.sillaIndex]) {
       cargarAlumno(
-        loader, 
-        escena, 
-        alumno.modelo, 
-        posicionesSillas[alumno.sillaIndex], 
+        loader,
+        escena,
+        alumno.modelo,
+        posicionesSillas[alumno.sillaIndex],
         alumno.opciones
       );
     }
@@ -376,6 +374,51 @@ function crearObjetos(escena, personajeSeleccionado = null) {
       console.error("Error cargando la puerta:", error);
     }
   );
+  // pizzarra atras
+  loader.load(
+    "./assets/models/BulletinBoard/bulletin_board.glb",
+    function (gltf) {
+      const cuadro = gltf.scene;
+      cuadro.position.set(-1, 1.5, -7);
+      escena.add(cuadro);
+    },
+    undefined,
+    function (error) {
+      console.error("Error cargando la pizarra de atras:", error);
+    }
+  );
+  //luz techo
+  loader.load(
+    "./assets/models/luzTecho/luzTecho.glb",
+    function (gltf) {
+      const luzTecho = gltf.scene;
+      luzTecho.position.set(0, 7.5, 0);
+      luzTecho.scale.set(0.7, 0.7, 0.7);
+      luzTecho.rotation.x = Math.PI;
+
+      escena.add(luzTecho);
+    },
+    undefined,
+    function (error) {
+      console.error("Error cargando la luz del techo:", error);
+    }
+  );
+
+  // libreria
+  loader.load(
+    "./assets/models/BookShelf/bookshelf.glb",
+    function (gltf) {
+      const libreria = gltf.scene;
+      libreria.position.set(-5.4, -0.5, -5);
+      libreria.scale.set(0.002, 0.002, 0.002);
+      // libreria.rotation.z = Math.PI / 2;
+      escena.add(libreria);
+    },
+    undefined,
+    function (error) {
+      console.error("Error cargando el librero:", error);
+    }
+  );
 
   // === MONSTRUO: Solo para Mario, aparece con susurro3.mp3 ===
   if (personajeSeleccionado === "Mario") {
@@ -397,9 +440,13 @@ function crearObjetos(escena, personajeSeleccionado = null) {
 
           // Posición inicial: cerca de la pizarra (frente)
           const posicionInicial = { x: 0, y: -2, z: 8 }; // Cerca de la pizarra
-          const posicionFinal = { x: 0, y: -2, z: -10 };  // Hacia la pared opuesta
-          
-          monstruo.position.set(posicionInicial.x, posicionInicial.y, posicionInicial.z);
+          const posicionFinal = { x: 0, y: -2, z: -10 }; // Hacia la pared opuesta
+
+          monstruo.position.set(
+            posicionInicial.x,
+            posicionInicial.y,
+            posicionInicial.z
+          );
           monstruo.scale.set(2, 2, 2);
           monstruo.rotation.y = Math.PI; // Mirando hacia la pared opuesta
 
@@ -427,7 +474,7 @@ function crearObjetos(escena, personajeSeleccionado = null) {
           const velocidad = 6; // Unidades por segundo (aumentado para más velocidad)
           const distanciaTotal = posicionInicial.z - posicionFinal.z;
           const tiempoTotal = distanciaTotal / velocidad;
-          
+
           // Variables para el movimiento
           let tiempoTranscurrido = 0;
           window.monstruoMovimiento = {
@@ -435,10 +482,14 @@ function crearObjetos(escena, personajeSeleccionado = null) {
             posicionInicial: posicionInicial,
             posicionFinal: posicionFinal,
             tiempoTotal: tiempoTotal,
-            tiempoTranscurrido: 0
+            tiempoTranscurrido: 0,
           };
 
-          console.log(`[Monstruo] Configurado movimiento: ${distanciaTotal} unidades en ${tiempoTotal.toFixed(2)} segundos`);
+          console.log(
+            `[Monstruo] Configurado movimiento: ${distanciaTotal} unidades en ${tiempoTotal.toFixed(
+              2
+            )} segundos`
+          );
 
           // Desactivar frustum culling
           monstruo.traverse((child) => {
@@ -449,7 +500,9 @@ function crearObjetos(escena, personajeSeleccionado = null) {
 
           window.monstruoActual = monstruo;
           escena.add(monstruo);
-          console.log("[Monstruo] Aparece corriendo desde la pizarra hacia atrás");
+          console.log(
+            "[Monstruo] Aparece corriendo desde la pizarra hacia atrás"
+          );
         },
         undefined,
         function (error) {
@@ -473,38 +526,40 @@ function crearObjetos(escena, personajeSeleccionado = null) {
     // Intentamos encontrar el audio por diferentes métodos
     setTimeout(() => {
       // Buscar por src que contenga susurro3
-      let susurro3Audio = Array.from(document.querySelectorAll('audio')).find(audio => 
-        audio.src && audio.src.includes('susurro3.mp3')
+      let susurro3Audio = Array.from(document.querySelectorAll("audio")).find(
+        (audio) => audio.src && audio.src.includes("susurro3.mp3")
       );
 
       if (susurro3Audio) {
-        susurro3Audio.addEventListener('play', crearMonstruo);
-        susurro3Audio.addEventListener('ended', eliminarMonstruo);
+        susurro3Audio.addEventListener("play", crearMonstruo);
+        susurro3Audio.addEventListener("ended", eliminarMonstruo);
         console.log("[Monstruo] Eventos configurados para susurro3.mp3");
       } else {
         console.warn("[Monstruo] No se encontró el audio susurro3.mp3");
         // Crear el audio si no existe y configurarlo
-        susurro3Audio = document.createElement('audio');
-        susurro3Audio.src = 'assets/sounds/susurro3.mp3';
-        susurro3Audio.addEventListener('play', crearMonstruo);
-        susurro3Audio.addEventListener('ended', eliminarMonstruo);
+        susurro3Audio = document.createElement("audio");
+        susurro3Audio.src = "assets/sounds/susurro3.mp3";
+        susurro3Audio.addEventListener("play", crearMonstruo);
+        susurro3Audio.addEventListener("ended", eliminarMonstruo);
         document.body.appendChild(susurro3Audio);
-        console.log("[Monstruo] Audio susurro3.mp3 creado y eventos configurados");
+        console.log(
+          "[Monstruo] Audio susurro3.mp3 creado y eventos configurados"
+        );
       }
 
       // También escuchar el evento global personalizado si el sistema de esquizofrenia lo dispara
-      window.addEventListener('susurro3-start', crearMonstruo);
-      window.addEventListener('susurro3-end', eliminarMonstruo);
+      window.addEventListener("susurro3-start", crearMonstruo);
+      window.addEventListener("susurro3-end", eliminarMonstruo);
     }, 1000); // Delay para asegurar que el DOM esté listo
-
   } else {
-    console.log(`[Objetos] NO se carga monstruo para ${personajeSeleccionado || 'personaje no especificado'}. Solo para Mario (esquizofrenia).`);
+    console.log(
+      `[Objetos] NO se carga monstruo para ${
+        personajeSeleccionado || "personaje no especificado"
+      }. Solo para Mario (esquizofrenia).`
+    );
   }
 
-
-
-
-// --- Modificar la función de carga ---
+  // --- Modificar la función de carga ---
   loader.load(
     "assets/models/personajes/profesor/Profesor.glb",
     function (gltf) {
@@ -553,37 +608,45 @@ function actualizarAnimaciones(deltaTime) {
   if (mixer) {
     mixer.update(deltaTime);
   }
-  
+
   // Actualizar animaciones de los alumnos
   if (window.alumnoMixers) {
-    window.alumnoMixers.forEach(alumnoMixer => {
+    window.alumnoMixers.forEach((alumnoMixer) => {
       alumnoMixer.update(deltaTime);
     });
   }
-  
+
   // Actualizar animación del monstruo
   if (window.monstruoMixer) {
     window.monstruoMixer.update(deltaTime);
   }
-  
+
   // Actualizar movimiento del monstruo
-  if (window.monstruoMovimiento && window.monstruoMovimiento.activo && window.monstruoActual) {
+  if (
+    window.monstruoMovimiento &&
+    window.monstruoMovimiento.activo &&
+    window.monstruoActual
+  ) {
     const mov = window.monstruoMovimiento;
     mov.tiempoTranscurrido += deltaTime;
-    
+
     // Calcular progreso (0 a 1)
     const progreso = Math.min(mov.tiempoTranscurrido / mov.tiempoTotal, 1);
-    
+
     // Interpolación lineal para la posición Z
-    const nuevaZ = mov.posicionInicial.z + (mov.posicionFinal.z - mov.posicionInicial.z) * progreso;
-    
+    const nuevaZ =
+      mov.posicionInicial.z +
+      (mov.posicionFinal.z - mov.posicionInicial.z) * progreso;
+
     // Actualizar posición del monstruo
     window.monstruoActual.position.z = nuevaZ;
-    
+
     // Si llegó al final, desactivar movimiento
     if (progreso >= 1) {
       mov.activo = false;
-      console.log("[Monstruo] Completó el recorrido desde la pizarra hasta atrás");
+      console.log(
+        "[Monstruo] Completó el recorrido desde la pizarra hasta atrás"
+      );
     }
   }
 }
@@ -591,7 +654,15 @@ function actualizarAnimaciones(deltaTime) {
 // Función para resetear la bandera de la campana (llamar al volver al menú)
 function resetearCampana() {
   campanaYaSono = false;
-  console.log("[Campana] Bandera reseteada - volverá a sonar en la próxima carga");
+  console.log(
+    "[Campana] Bandera reseteada - volverá a sonar en la próxima carga"
+  );
 }
 
-export { crearObjetos, animations, mixer, actualizarAnimaciones, resetearCampana };
+export {
+  crearObjetos,
+  animations,
+  mixer,
+  actualizarAnimaciones,
+  resetearCampana,
+};
