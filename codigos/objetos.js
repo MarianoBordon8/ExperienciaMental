@@ -79,6 +79,14 @@ function crearObjetos(escena, personajeSeleccionado = null) {
   const loadingManager = new THREE.LoadingManager();
   const loader = new GLTFLoader(loadingManager);
 
+  // Variables para swap del profesor <-> monstruo3
+  let profesorGLTF = null; // almacenará el GLTF original del profesor
+  let profesorActivo = null; // referencia a la instancia actualmente en escena
+  let profesorSwapTimeout = null; // timeout id para programar swaps
+  let profesorReemplazado = false; // flag si actualmente está reemplazado
+  // Scheduler compartido para monstruo2 / monstruo3
+  let sharedSpawnTimeout = null;
+
   const progressBar = document.getElementById("progress-bar");
   loadingManager.onProgress = function (url, loaded, total) {
     progressBar.value = (loaded / total) * 100;
@@ -576,18 +584,19 @@ function crearObjetos(escena, personajeSeleccionado = null) {
             console.log('[Monstruo2] No se pudo reproducir el grito:', e);
           }
 
-          // Auto-eliminar después de un tiempo (ej. 8s) y programar siguiente aparición
+          // Auto-eliminar después de un tiempo (ej. 4.5s)
           window.monstruo2RemoveTimeout = setTimeout(() => {
             eliminarMonstruo2();
-            scheduleMonstruo2();
+            // reprogramar usando el scheduler compartido
+            scheduleSharedSpawn();
           }, 4500);
 
         },
         undefined,
         function (err) {
           console.error('[Monstruo2] Error cargando:', err);
-          // Si falla la carga, reintentar más tarde
-          scheduleMonstruo2();
+            // Si falla la carga, reintentar más tarde con el scheduler compartido
+            scheduleSharedSpawn();
         }
       );
     }
@@ -616,17 +625,166 @@ function crearObjetos(escena, personajeSeleccionado = null) {
         }
     }
 
+      // === MONSTRUO4: aparece repetidamente entre 8 y 12s, posición fija y anima 'animation.001' ===
+      function crearMonstruo4() {
+        if (window.monstruo4Actual) return;
+
+        loader.load('assets/models/personajes/monstruo4/monstruo4.gltf', function(gltf) {
+          const m4 = gltf.scene;
+
+          // Posición solicitada
+          m4.position.set(-2.2, 0.4, -0.2);
+          m4.rotation.y = Math.PI; // mirar hacia el otro lado, igual que monstruo2
+          m4.scale.set(0.2, 0.2, 0.2);
+
+          // Animaciones: imitar la estructura de monstruo2 pero reproducir 'animation.001' en LoopOnce
+          if (gltf.animations && gltf.animations.length) {
+            const m4Mixer = new THREE.AnimationMixer(m4);
+            const m4Animations = {};
+
+            gltf.animations.forEach((clip) => {
+              const action = m4Mixer.clipAction(clip);
+              m4Animations[clip.name] = action;
+            });
+
+            // Preferir 'animation.001', fallback a la primera animación
+            const clipName = 'animation.001';
+            if (m4Animations[clipName]) {
+              m4Animations[clipName].setLoop(THREE.LoopOnce);
+              m4Animations[clipName].clampWhenFinished = true;
+              m4Animations[clipName].play();
+            } else if (gltf.animations[0]) {
+              const first = gltf.animations[0];
+              const action = m4Mixer.clipAction(first);
+              action.setLoop(THREE.LoopOnce);
+              action.clampWhenFinished = true;
+              action.play();
+            }
+
+            window.monstruo4Mixer = m4Mixer;
+          }
+
+          m4.traverse((child) => {
+            if (child.isMesh) child.frustumCulled = false;
+          });
+
+          window.monstruo4Actual = m4;
+          escena.add(m4);
+
+          // Cuando termina la animación, eliminar y reprogramar
+          if (window.monstruo4Mixer) {
+            const onFinished = (e) => {
+              try { window.monstruo4Mixer.removeEventListener('finished', onFinished); } catch (er) {}
+              eliminarMonstruo4();
+              // usar scheduler compartido para la próxima aparición
+              scheduleSharedSpawn();
+            };
+            window.monstruo4Mixer.addEventListener('finished', onFinished);
+          } else {
+            // Fallback: auto-eliminar tras 4.5s y reprogramar el scheduler compartido
+            window.monstruo4RemoveTimeout = setTimeout(() => {
+              eliminarMonstruo4();
+              scheduleSharedSpawn();
+            }, 4500);
+          }
+
+        }, undefined, function(err) {
+          console.error('[Monstruo4] Error cargando:', err);
+          // reprogramar usando el scheduler compartido
+          scheduleSharedSpawn();
+        });
+      }
+
+      function eliminarMonstruo4() {
+        if (window.monstruo4Actual) {
+          try { escena.remove(window.monstruo4Actual); } catch (e) {}
+          window.monstruo4Actual = null;
+        }
+        if (window.monstruo4Mixer) {
+          window.monstruo4Mixer = null;
+        }
+        if (window.monstruo4RemoveTimeout) {
+          clearTimeout(window.monstruo4RemoveTimeout);
+          window.monstruo4RemoveTimeout = null;
+        }
+      }
+
+      // (NOTE) scheduler de monstruo4 eliminado: ahora participa en el scheduler compartido
     // Scheduler: programa la próxima aparición en un tiempo aleatorio entre 10 y 40 segundos
     function scheduleMonstruo2() {
       // limpiar si ya hay uno programado
       if (window.monstruo2Timeout) {
         clearTimeout(window.monstruo2Timeout);
       }
-  const delay = 10000 + Math.floor(Math.random() * 20001); // 10000..30000 ms
+  const delay = 10000 + Math.floor(Math.random() * 10001); // 10000..30000 ms
       console.log('[Monstruo2] Programada próxima aparición en', (delay / 1000).toFixed(1), 's');
       window.monstruo2Timeout = setTimeout(() => {
         crearMonstruo2();
       }, delay);
+    }
+
+    // Scheduler compartido: elige aleatoriamente entre crearMonstruo2 o swapProfesorPorMonstruo3
+    function scheduleSharedSpawn() {
+      // limpiar si ya hay uno programado
+      if (sharedSpawnTimeout) {
+        clearTimeout(sharedSpawnTimeout);
+        sharedSpawnTimeout = null;
+      }
+  // intervalo aleatorio entre 8 y 30s (ahora incluye monstruo4)
+  const delay = 8000 + Math.floor(Math.random() * 22001); // 8000..30000 ms
+  console.log('[SharedSpawn] Programada próxima aparición en', (delay / 1000).toFixed(1), 's');
+      sharedSpawnTimeout = setTimeout(() => {
+        // Solo ejecutar si esquizofrenia ON y Mario seleccionado
+        if (!esquizofreniaOn || personajeSeleccionado !== 'Mario') {
+          // reprogramar
+          scheduleSharedSpawn();
+          return;
+        }
+
+        // Elegir aleatoriamente entre monstruo2, monstruo3 y monstruo4 (≈1/3 cada uno)
+        const r = Math.random();
+        if (r < 1 / 3) {
+          crearMonstruo2();
+        } else if (r < 2 / 3) {
+          swapProfesorPorMonstruo3();
+        } else {
+          crearMonstruo4();
+        }
+        // No programamos aquí; cada flujo (eliminación o fin de animación)
+        // llamará a scheduleSharedSpawn() para continuar el ciclo.
+      }, delay);
+    }
+
+    function cancelScheduleSharedSpawn() {
+      if (sharedSpawnTimeout) {
+        clearTimeout(sharedSpawnTimeout);
+        sharedSpawnTimeout = null;
+      }
+      // cancelar schedulers individuales
+      if (profesorSwapTimeout) {
+        clearTimeout(profesorSwapTimeout);
+        profesorSwapTimeout = null;
+      }
+      if (window.monstruo2Timeout) {
+        clearTimeout(window.monstruo2Timeout);
+        window.monstruo2Timeout = null;
+      }
+      // limpiar timeouts activos de monstruos
+      if (window.monstruo2RemoveTimeout) {
+        clearTimeout(window.monstruo2RemoveTimeout);
+        window.monstruo2RemoveTimeout = null;
+      }
+      if (window.monstruo4RemoveTimeout) {
+        clearTimeout(window.monstruo4RemoveTimeout);
+        window.monstruo4RemoveTimeout = null;
+      }
+      // (sin estado de monstruo4 — scheduler sólo maneja monstruo2 y monstruo3)
+      // restaurar profesor si fue reemplazado
+      if (profesorReemplazado) restoreProfesor();
+      // eliminar monstruo2 si existe
+      if (window.monstruo2Actual) eliminarMonstruo2(false);
+      // eliminar monstruo4 si existe
+      if (window.monstruo4Actual) eliminarMonstruo4();
     }
 
     function cancelScheduleMonstruo2() {
@@ -642,6 +800,135 @@ function crearObjetos(escena, personajeSeleccionado = null) {
       if (window.monstruo2Actual) eliminarMonstruo2();
     }
 
+    // --- Swap Profesor <-> Monstruo3 (solo si Mario seleccionado y esquizofrenia ON)
+    function scheduleProfesorSwap() {
+      // limpiar si ya hay uno programado
+      if (profesorSwapTimeout) {
+        clearTimeout(profesorSwapTimeout);
+        profesorSwapTimeout = null;
+      }
+      // intervalo aleatorio entre 15 y 30s
+      const delay = 15000 + Math.floor(Math.random() * 15001); // 15000..30000 ms
+      profesorSwapTimeout = setTimeout(() => {
+        if (esquizofreniaOn && personajeSeleccionado === 'Mario') {
+          swapProfesorPorMonstruo3();
+        } else {
+          // si ya no corresponde, reprogramar
+          scheduleProfesorSwap();
+        }
+      }, delay);
+    }
+
+    function cancelScheduleProfesorSwap() {
+      if (profesorSwapTimeout) {
+        clearTimeout(profesorSwapTimeout);
+        profesorSwapTimeout = null;
+      }
+      // Si el profesor fue reemplazado, restaurarlo inmediatamente
+      if (profesorReemplazado) {
+        restoreProfesor();
+      }
+    }
+
+    function swapProfesorPorMonstruo3() {
+      if (!profesorGLTF || profesorReemplazado || !profesorActivo) return;
+      // Remover profesor de la escena
+      try {
+        escena.remove(profesorActivo);
+      } catch (e) {}
+      profesorReemplazado = true;
+
+      // Cargar monstruo3 y reproducir animación 'Idle' (LoopOnce)
+      loader.load('assets/models/personajes/monstruo3/monstruo3.gltf', function(gltf) {
+        const m3 = gltf.scene;
+        // Posicionar igual que el profesor
+        try {
+          m3.position.copy(profesorGLTF.scene.position);
+          m3.rotation.copy(profesorGLTF.scene.rotation);
+          m3.scale.copy(profesorGLTF.scene.scale);
+        } catch (e) {
+          // si falla, dejar defaults
+        }
+
+        // Animaciones
+        let m3Mixer = null;
+        if (gltf.animations && gltf.animations.length) {
+          m3Mixer = new THREE.AnimationMixer(m3);
+          const idleClip = gltf.animations.find(c => c.name === 'Idle') || gltf.animations[0];
+          if (idleClip) {
+            const action = m3Mixer.clipAction(idleClip);
+            action.setLoop(THREE.LoopOnce);
+            action.clampWhenFinished = true;
+            action.play();
+          }
+          window.monstruo3Mixer = m3Mixer;
+        }
+
+        m3.traverse(child => { if (child.isMesh) child.frustumCulled = false; });
+        window.monstruo3Actual = m3;
+        escena.add(m3);
+
+        // Esperar a que termine la animación usando el evento 'finished' del mixer
+        if (m3Mixer) {
+          const onFinished = (e) => {
+            // Eliminar listener y la malla
+            try { m3Mixer.removeEventListener('finished', onFinished); } catch (er) {}
+            try { escena.remove(m3); } catch (er) {}
+            window.monstruo3Actual = null;
+            window.monstruo3Mixer = null;
+            // Restaurar profesor
+            restoreProfesor();
+            // Programar siguiente aparición usando el scheduler compartido
+            scheduleSharedSpawn();
+          };
+          m3Mixer.addEventListener('finished', onFinished);
+        } else {
+          // Si no hay mixer, restaurar después de 5s
+          setTimeout(() => {
+            try { escena.remove(m3); } catch (er) {}
+            window.monstruo3Actual = null;
+            restoreProfesor();
+            scheduleSharedSpawn();
+          }, 5000);
+        }
+
+      }, undefined, function(err){
+        console.error('[ProfesorSwap] Error cargando monstruo3:', err);
+        profesorReemplazado = false;
+  // Reprogramar (usar scheduler compartido)
+  scheduleSharedSpawn();
+      });
+    }
+
+    function restoreProfesor() {
+      if (!profesorGLTF) return;
+      // Limpiar animaciones actuales
+      try {
+        // eliminar propiedades previas de animations
+        for (const k in animations) delete animations[k];
+      } catch (e) {}
+
+      // Re-crear mixer y acciones para el profesor
+      try {
+        const prof = profesorGLTF.scene;
+        mixer = new THREE.AnimationMixer(prof);
+        if (profesorGLTF.animations && profesorGLTF.animations.length) {
+          profesorGLTF.animations.forEach((clip) => {
+            const action = mixer.clipAction(clip);
+            animations[clip.name] = action;
+          });
+        }
+        if (animations['hablando']) animations['hablando'].play();
+
+        // Añadir de nuevo a la escena si no está
+        try { escena.add(prof); } catch (e) {}
+        profesorActivo = prof;
+        profesorReemplazado = false;
+      } catch (e) {
+        console.error('[ProfesorSwap] Error restaurando profesor:', e);
+      }
+    }
+
     // --- Integración con el estado de Esquizofrenia ---
     // Actualiza el estado local y decide si iniciar/pausar el scheduler
     let esquizofreniaPollInterval = null;
@@ -652,13 +939,16 @@ function crearObjetos(escena, personajeSeleccionado = null) {
       window.esquizofreniaOn = esquizofreniaOn;
 
       if (prev !== current) {
-        if (current) {
-          // Si se activa, programar próximas apariciones
-          scheduleMonstruo2();
-        } else {
-          // Si se desactiva, cancelar scheduler y eliminar cualquier monstruo2 presente
-          cancelScheduleMonstruo2();
-        }
+          if (current) {
+            // Si se activa, iniciar el scheduler compartido (ahora incluye monstruo4)
+            scheduleSharedSpawn();
+          } else {
+            // Si se desactiva, cancelar los schedulers y limpiar cualquier estado temporal
+            cancelScheduleSharedSpawn();
+            // Asegurar que no queden timeouts/instancias de monstruo4
+            if (window.monstruo4RemoveTimeout) { clearTimeout(window.monstruo4RemoveTimeout); window.monstruo4RemoveTimeout = null; }
+            if (window.monstruo4Actual) eliminarMonstruo4();
+          }
       }
 
       // Asegurar que exista un poll como fallback si no se disparan eventos desde el módulo
@@ -695,7 +985,7 @@ function crearObjetos(escena, personajeSeleccionado = null) {
   // y actuamos cuando cambie. Esto hace que monstruo2 solo aparezca si isAutoOn() está ON.
   updateEsquizofreniaState();
 
-  // Escuchar cambios emitidos por el módulo de esquizofrenia (varias variantes de nombre)
+    // Escuchar cambios emitidos por el módulo de esquizofrenia (varias variantes de nombre)
   window.addEventListener('esquizofrenia:change', updateEsquizofreniaState);
   window.addEventListener('esquizofrenia-change', updateEsquizofreniaState);
   window.addEventListener('esquizofrenia-changed', updateEsquizofreniaState);
@@ -703,8 +993,7 @@ function crearObjetos(escena, personajeSeleccionado = null) {
   // También escuchar los eventos de susurro3 que controlan monstruo1
   window.addEventListener("susurro3-start", crearMonstruo);
   window.addEventListener("susurro3-end", eliminarMonstruo);
-  // Añadir listeners para limpiar scheduler si termina susurro3
-  window.addEventListener('susurro3-end', cancelScheduleMonstruo2);
+  // NOTA: no cancelamos el scheduler compartido al terminar susurro3
     }, 1000); // Delay para asegurar que el DOM esté listo
   } else {
     console.log(
@@ -721,7 +1010,7 @@ function crearObjetos(escena, personajeSeleccionado = null) {
       const profesor = gltf.scene;
 
       // Posición, escala y rotación...
-      profesor.position.set(-5, -2.2, 9);
+      profesor.position.set(-7, -2.2, 9);
       profesor.scale.set(3, 3, 3);
       profesor.rotation.y = Math.PI;
 
@@ -749,6 +1038,9 @@ function crearObjetos(escena, personajeSeleccionado = null) {
       });
 
       escena.add(profesor);
+      // Guardar referencia al GLTF original y la instancia en escena
+      profesorGLTF = gltf;
+      profesorActivo = profesor;
     },
     undefined,
     function (error) {
@@ -778,6 +1070,16 @@ function actualizarAnimaciones(deltaTime) {
   // Actualizar animación del monstruo2 (si existe)
   if (window.monstruo2Mixer) {
     window.monstruo2Mixer.update(deltaTime);
+  }
+
+  // Actualizar animación del monstruo3 (si existe)
+  if (window.monstruo3Mixer) {
+    window.monstruo3Mixer.update(deltaTime);
+  }
+
+  // Actualizar animación del monstruo4 (si existe)
+  if (window.monstruo4Mixer) {
+    window.monstruo4Mixer.update(deltaTime);
   }
 
   // Actualizar movimiento del monstruo
