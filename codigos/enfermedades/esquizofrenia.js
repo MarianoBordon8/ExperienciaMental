@@ -41,12 +41,10 @@ const posicionesEspaciales = [
 // ---------- Init base (sin arrancar) ----------
 function inicializarAudioEsquizofrenia() {
   if (isAudioInitialized) {
-    console.log("[Esquizofrenia] init: ya estaba inicializado.");
     return;
   }
 
   try {
-    console.log("[Esquizofrenia] init: creando AudioContext y grafo…");
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
     // Listener del usuario (sentado mirando al frente)
@@ -100,13 +98,9 @@ function inicializarAudioEsquizofrenia() {
       gainNodes.push(gain);
       pannerNodes.push(pan3d);
 
-      console.log(`[Esquizofrenia] pista #${i+1} lista (${ruta}), gain=${volumenes[i]}`);
     });
 
     isAudioInitialized = true;
-    console.log(
-      `[Esquizofrenia] Sistema inicializado con ${rutasAudios.length} pistas y ${posicionesEspaciales.length} posiciones espaciales.`
-    );
   } catch (err) {
     console.error("[Esquizofrenia] Error al inicializar:", err);
     isAudioInitialized = false;
@@ -123,16 +117,12 @@ function reproducirAudio(audioElement, indice) {
   // Si ya sonaba, reiniciar
   if (!audioElement.paused) audioElement.currentTime = 0;
 
-  console.log(`[Esquizofrenia] play pista #${indice+1}`);
-  
   // Si es susurro3 (índice 2), disparar evento para el monstruo
   if (indice === 2) { // susurro3.mp3
-    console.log("[Esquizofrenia] Reproduciendo susurro3 - disparando evento para monstruo");
     window.dispatchEvent(new Event('susurro3-start'));
     
     // Configurar evento para cuando termine
     const onEndedHandler = () => {
-      console.log("[Esquizofrenia] Susurro3 terminó - disparando evento para ocultar monstruo");
       window.dispatchEvent(new Event('susurro3-end'));
       audioElement.removeEventListener('ended', onEndedHandler);
     };
@@ -155,7 +145,6 @@ function reproducirSusurroAleatorio() {
   const pan = pannerNodes[i];
 
   const p = posicionesEspaciales[Math.floor(Math.random() * posicionesEspaciales.length)];
-  console.log(`[Esquizofrenia] susurro rand -> pista #${i+1}, pos=${p.descripcion} (${p.x},${p.y},${p.z})`);
 
   if (pan.positionX) {
     pan.positionX.setValueAtTime(p.x, audioContext.currentTime);
@@ -166,7 +155,6 @@ function reproducirSusurroAleatorio() {
   }
 
   if (audioContext.state === 'suspended') {
-    console.log("[Esquizofrenia] AudioContext suspendido → resume()");
     audioContext.resume().then(() => reproducirAudio(el, i));
   } else {
     reproducirAudio(el, i);
@@ -206,18 +194,15 @@ function detenerReproduccionAutomatica() {
   if (!isAutoPlayActive) { console.log("[Esquizofrenia] detener: ya estaba OFF"); return; }
   isAutoPlayActive = false;
   if (intervalId) { clearTimeout(intervalId); intervalId = null; }
-  console.log("[Esquizofrenia] AUTOPLAY OFF (stop & reset)");
 
   // Parar cualquier reproducción en curso
   susurroAudios.forEach((a, idx) => {
     if (a && !a.paused) {
       a.pause(); a.currentTime = 0;
-      console.log(`[Esquizofrenia] stop pista #${idx+1}`);
     }
   });
 
   if (audioContext && audioContext.state === 'running') {
-    console.log("[Esquizofrenia] suspend() AudioContext para ahorrar CPU");
     audioContext.suspend().catch(()=>{});
   }
 }
@@ -225,7 +210,6 @@ function detenerReproduccionAutomatica() {
 function toggleEsquizofrenia() {
   if (!isAudioInitialized) inicializarAudioEsquizofrenia();
   const on = !isAutoPlayActive;
-  console.log(`[Esquizofrenia] toggle → ${on ? "ON" : "OFF"}`);
   on ? iniciarReproduccionAutomatica() : detenerReproduccionAutomatica();
   return on;
 }
@@ -241,11 +225,9 @@ function reproducirSusurroDerecho() {
 }
 
 function desactivarSistemaEsquizofrenia() {
-  console.log("[Esquizofrenia] desactivarSistemaEsquizofrenia()");
   detenerReproduccionAutomatica();
   susurroAudios.forEach((a, idx) => {
     if (!a.paused) { a.pause(); a.currentTime = 0; }
-    console.log(`[Esquizofrenia] liberar pista #${idx+1}`);
   });
   try { if (audioContext) audioContext.close(); } catch {}
   audioContext = null;
@@ -255,7 +237,6 @@ function desactivarSistemaEsquizofrenia() {
   gainNodes = [];
   pannerNodes = [];
   isAudioInitialized = false;
-  console.log("[Esquizofrenia] contexto cerrado y arrays limpiados.");
 }
 
 function isAutoOn() { return isAutoPlayActive; }

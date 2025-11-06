@@ -24,11 +24,11 @@ import { crearMovimientoCamara } from "./movimientoCamara.js";
 function etiquetaPorEnfermedad(enf) {
   switch (enf) {
     case "dislexia":
-      return "Dislexia ON/OFF";
+      return "Dislexia";
     case "esquizofrenia":
-      return "Esquizofrenia ON/OFF";
+      return "Esquizofrenia";
     case "ansiedad":
-      return "Ansiedad ON/OFF";
+      return "Ansiedad";
     default:
       return "ON/OFF";
   }
@@ -80,7 +80,6 @@ function createOptimizedRenderer(canvas) {
 
 /* ================== CrearCanvas ================== */
 async function CrearCanvas(idOpcionPersonaje) {
-  console.log("[Canvas] Personaje:", idOpcionPersonaje);
 
   // --- Escena ---
   const escena = new THREE.Scene();
@@ -124,7 +123,6 @@ async function CrearCanvas(idOpcionPersonaje) {
 
   if (idOpcionPersonaje === "Juan") {
     enfermedad = "dislexia";
-    console.log("[Canvas] Cargando dislexia dinámicamente SOLO para Juan...");
 
     // ✨ CARGA DINÁMICA: Solo se carga si es Juan
     const { inicializarSistemaDislexia } = await import(
@@ -133,9 +131,6 @@ async function CrearCanvas(idOpcionPersonaje) {
     inicializarSistemaDislexia(televisor, examen, idOpcionPersonaje);
   } else if (idOpcionPersonaje === "Mario") {
     enfermedad = "esquizofrenia";
-    console.log(
-      "[Canvas] Cargando esquizofrenia dinámicamente SOLO para Mario..."
-    );
 
     // ✨ CARGA DINÁMICA: Solo se carga si es Mario
     const { activarSistemaEsquizofrenia } = await import(
@@ -144,7 +139,6 @@ async function CrearCanvas(idOpcionPersonaje) {
     activarSistemaEsquizofrenia(); // solo init
   } else if (idOpcionPersonaje === "Franco") {
     enfermedad = "ansiedad";
-    console.log("[Canvas] Cargando ansiedad dinámicamente SOLO para Franco...");
 
     // ✨ CARGA DINÁMICA: Solo se carga si es Franco
     const { activarSistemaAnsiedad } = await import(
