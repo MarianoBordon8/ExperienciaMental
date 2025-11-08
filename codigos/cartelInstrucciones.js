@@ -41,6 +41,10 @@ function crearCartelInstrucciones() {
       <span style="background: #333; padding: 2px 6px; border-radius: 3px; margin-right: 8px; font-weight: bold;">P</span>
       = Parcial
     </div>
+    <div style="margin-bottom: 5px;">
+      <span style="background: #333; padding: 2px 6px; border-radius: 3px; margin-right: 8px; font-weight: bold;">O</span>
+      = Texto
+    </div>
     <div>
       <span style="background: #333; padding: 2px 6px; border-radius: 3px; margin-right: 8px; font-weight: bold;">Esc</span>
       = Salir al menú

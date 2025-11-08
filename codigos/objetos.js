@@ -194,16 +194,16 @@ function crearObjetos(escena, personajeSeleccionado = null) {
   /****** Cargar Libros ******/
 
   const posicionesLibros = [
-    [-2.2, 0.19, -2.5],
-    [-0.2, 0.19, -2.5], // Fila trasera
-    [-2.2, 0.19, -0.5],
-    [-0.2, 0.19, -0.5], // Fila del medio
+    [-2.1, 0.19, -2.7],
+    [-0.1, 0.19, -2.7], // Fila trasera
+    [-2.1, 0.19, -0.7],
+    [-0.1, 0.19, -0.7], // Fila del medio
   ];
 
   // Cargar libros sobre cada banco
   posicionesLibros.forEach((pos) => {
     loader.load(
-      "./assets/models/libro/libro.gltf", // <-- ruta a tu modelo de libro
+      "./assets/models/libro/libro2.gltf", // <-- ruta a tu modelo de libro
       function (gltf) {
         const libro = gltf.scene;
 
@@ -216,7 +216,8 @@ function crearObjetos(escena, personajeSeleccionado = null) {
         );
 
         // Escalar según necesites
-        libro.scale.set(0.005, 0.005, 0.005);
+        libro.scale.set(0.019, 0.019, 0.019);
+        libro.rotation.y = Math.PI / 2; // 90°
 
         // Agregar a la escena
         escena.add(libro);
