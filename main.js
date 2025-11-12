@@ -123,7 +123,25 @@ function ensureExitButton() {
   btn.style.top = "14px";
   btn.style.left = "14px";
   btn.style.zIndex = "10050";
-  btn.addEventListener("click", exitToMenu);
+  btn.addEventListener("click", (ev) => {
+    // Comportamiento igual que la tecla Escape: si la encuesta NO está abierta, mostrarla;
+    // si la encuesta ya está abierta, proceder a salir al menú.
+    try {
+      // importar funciones ya están disponibles por import estático
+      if (typeof isEncuestaAbierta === 'function' && typeof mostrarEncuesta === 'function') {
+        if (!isEncuestaAbierta() && game && getComputedStyle(game).display !== "none") {
+          ev.preventDefault();
+          const enf = window.enfermedadActual || 'dislexia';
+          mostrarEncuesta(enf);
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn('[ExitButton] Error verificando encuesta:', e);
+    }
+    // Si la encuesta ya estaba abierta (o hubo error), salir al menú
+    exitToMenu();
+  });
   document.body.appendChild(btn);
   exitBtn = btn;
   return btn;
