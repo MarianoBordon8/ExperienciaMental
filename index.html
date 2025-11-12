@@ -26,77 +26,20 @@
     <!-- Hints: calienta el módulo del simulador -->
     <link rel="modulepreload" href="codigos/canvas.js" />
 
-    <!-- Ajustes UX/scroll + blindajes -->
-    <style>
-      /* Solo scroll vertical en la landing */
-      html {
-        scroll-behavior: smooth;
-        overflow-x: hidden;
-      }
-      body {
-        overflow-y: auto !important;
-        overflow-x: hidden !important;
-      }
-      body.no-scroll {
-        overflow: hidden !important;
-      } /* solo mientras corre el simulador */
-
-      #experiencias,
-      #como-jugar,
-      #objetivos,
-      #sobre {
-        scroll-margin-top: 80px;
-      }
-
-      /* Reveal on scroll */
-      .reveal {
-        opacity: 0;
-        transform: translateY(18px);
-        transition: opacity 0.6s ease, transform 0.6s ease;
-      }
-      .reveal.in {
-        opacity: 1;
-        transform: none;
-      }
-
-      /* Blindaje visual al salir */
-      body.exiting .threejsCanvas {
-        display: none !important;
-        visibility: hidden !important;
-        opacity: 0 !important;
-      }
-
-      /* Respeto a usuarios con “reducir movimiento” */
-      @media (prefers-reduced-motion: reduce) {
-        .hero__bg,
-        .exp-card {
-          animation: none !important;
-          transition: none !important;
-        }
-      }
-
-      /* Botón salir por encima de la pantalla de carga */
-      .btn-exit {
-        position: fixed;
-        top: 14px;
-        left: 14px;
-        z-index: 10050;
-        border-radius: 10px;
-        padding: 10px 14px;
-        opacity: 0.98;
-      }
-      .btn-exit:hover {
-        opacity: 1;
-      }
-
-      /* La pantalla de carga no bloquea clics al botón que va por encima */
-      .pantalla-carga {
-        pointer-events: none;
-      }
-    </style>
+    <!-- Meta enriquecidos -->
+    <meta name="theme-color" content="#0b1020" />
+    <meta property="og:title" content="Empathy Lab" />
+    <meta property="og:description" content="Empathy Lab — simulador 3D educativo" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="es_AR" />
+    <meta property="og:site_name" content="Empathy Lab" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Empathy Lab" />
+    <meta name="twitter:description" content="Empathy Lab — simulador 3D educativo" />
   </head>
 
   <body>
+    <a href="#experiencias" class="skip-link">Saltar al contenido</a>
     <!-- ===== Landing / Menú ===== -->
     <div class="landing" id="top">
       <header class="nav">
@@ -106,7 +49,7 @@
             <span class="brand__name">Empathy Lab</span>
           </a>
         </div>
-        <button class="nav__toggle" aria-label="Abrir menú" id="navToggle">
+        <button class="nav__toggle" aria-label="Abrir menú" id="navToggle" aria-controls="navMenu" aria-expanded="false">
           <span></span><span></span><span></span>
         </button>
         <nav class="nav__right" id="navMenu">
@@ -261,6 +204,28 @@
               </button>
             </div>
           </article>
+
+          <!-- PRÓXIMAMENTE -->
+          <article class="exp-card reveal" aria-disabled="true">
+            <div class="exp-card__media">
+              <img
+                alt="Próximamente — Nueva experiencia"
+                loading="lazy"
+                decoding="async"
+                src="data:image/svg+xml;utf8,<?xml version='1.0' encoding='UTF-8'?><svg xmlns='http://www.w3.org/2000/svg' width='800' height='450'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop stop-color='%232f3156' offset='0'/><stop stop-color='%230b1020' offset='1'/></linearGradient></defs><rect width='100%25' height='100%25' fill='url(%23g)'/><text x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='%23d6d9f0' font-family='Nunito Sans, Arial' font-size='36'>Próximamente</text></svg>"
+              />
+              <span class="exp-card__tag">Próximamente</span>
+            </div>
+            <div class="exp-card__body">
+              <h3>Próximamente</h3>
+              <p>
+                Nueva experiencia en desarrollo. ¡Vuelve pronto!
+              </p>
+            </div>
+            <div class="exp-card__actions">
+              <button class="btn btn--ghost" disabled>Próximamente</button>
+            </div>
+          </article>
         </div>
       </section>
 
@@ -301,6 +266,7 @@
           <li class="reveal">
             <span class="kbd">C</span> Efecto ON/OFF (según experiencia)
           </li>
+          <li class="reveal"><span class="kbd">O</span> Texto</li>
           <li class="reveal"><span class="kbd">Esc</span> Salir al menú</li>
         </ul>
       </section>
@@ -312,9 +278,7 @@
           escucha, recibe consignas y participa. Control respetuoso y ético: el
           foco está en comprender y apoyar.
         </p>
-        <a class="btn btn--ghost" href="No_programamos_esta_pagina_todavia"
-          >Más info</a
-        >
+        <a class="btn btn--ghost" href="#experiencias">Explorar experiencias</a>
       </section>
 
       <footer class="footer">
@@ -365,15 +329,23 @@
       // Garantiza que la landing arranque scrolleable
       document.body.classList.remove("no-scroll");
 
-      // Toggle menú móvil
+      // Toggle menú móvil + ARIA
       const navToggle = document.getElementById("navToggle");
       const navMenu = document.getElementById("navMenu");
       if (navToggle && navMenu) {
-        navToggle.addEventListener("click", () =>
-          navMenu.classList.toggle("open")
-        );
+        const updateExpanded = () => {
+          const isOpen = navMenu.classList.contains("open");
+          navToggle.setAttribute("aria-expanded", String(isOpen));
+        };
+        navToggle.addEventListener("click", () => {
+          navMenu.classList.toggle("open");
+          updateExpanded();
+        });
         navMenu.addEventListener("click", (e) => {
-          if (e.target.tagName === "A") navMenu.classList.remove("open");
+          if (e.target.tagName === "A") {
+            navMenu.classList.remove("open");
+            updateExpanded();
+          }
         });
       }
 
