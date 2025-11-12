@@ -6,6 +6,9 @@ let switchOffElem = null;
 let switchContainer = null;
 let modoCOn = false; // estado interno
 
+// IMPORT: evitar toggles cuando la encuesta está abierta
+import { isEncuestaAbierta } from "./encuestas.js";
+
 function crearCartelInstrucciones() {
   const cartelInstrucciones = document.createElement('div');
   cartelInstrucciones.id = 'cartelInstrucciones';
@@ -65,10 +68,18 @@ function crearCartelInstrucciones() {
   // Alternar al presionar la tecla 'C' (mayúscula o minúscula)
   document.addEventListener('keydown', (e) => {
     if (!e) return;
-    // Ignorar si se está escribiendo en un input/textarea
+
+    // Ignorar si se está escribiendo en un input/textarea o contenido editable
     const target = e.target || e.srcElement;
     const tag = target && target.tagName ? target.tagName.toLowerCase() : '';
     if (tag === 'input' || tag === 'textarea' || target.isContentEditable) return;
+
+    // Si la encuesta está abierta, no permitir toggle (pero respetamos escritura en campos)
+    if (typeof isEncuestaAbierta === "function" && isEncuestaAbierta()) {
+      e.stopPropagation();
+      e.preventDefault();
+      return;
+    }
 
     if (e.key === 'c' || e.key === 'C') {
       modoCOn = !modoCOn;

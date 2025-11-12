@@ -14,6 +14,7 @@ import { crearTelevisor } from "./televisor.js";
 import { crearExamen } from "./examen.js";
 import { manejarEventosTeclado } from "./eventosTeclado.js";
 import { crearMovimientoCamara } from "./movimientoCamara.js";
+import { inicializarEncuestas } from "./encuestas.js"; // ← import añadido
 
 // Experiencias: TODAS se cargan dinámicamente según el personaje seleccionado
 // import { inicializarSistemaDislexia } from "./enfermedades/dislexia.js"; // ← Ahora se carga dinámicamente
@@ -149,8 +150,13 @@ async function CrearCanvas(idOpcionPersonaje) {
     console.warn("[Canvas] Personaje no reconocido. Solo escena básica.");
   }
 
-  // Actualizar cartel “C = …”
+  // Exponer la enfermedad actual globalmente (main.js / otros módulos la usan)
+  window.enfermedadActual = enfermedad;
   setEtiquetaC(etiquetaPorEnfermedad(enfermedad));
+
+  // --- Inicializar encuestas: se abrirán al presionar ESC según la enfermedad actual ---
+  // usamos window.enfermedadActual para asegurarnos de que siempre refleje la selección real
+  inicializarEncuestas(() => window.enfermedadActual || enfermedad || "dislexia");
 
   // --- Teclado unificado (C = ON/OFF, P = examen) ---
   manejarEventosTeclado(camara, televisor, examen, movimiento, enfermedad);

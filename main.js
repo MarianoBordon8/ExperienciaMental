@@ -185,9 +185,21 @@ async function exitToMenu() {
   });
 })();
 
-/* =============== Atajo global: Esc = salir =============== */
+import { mostrarEncuesta, isEncuestaAbierta } from './codigos/encuestas.js';
+
+/* =============== Atajo global: Esc = salir / abrir encuesta =============== */
 window.addEventListener("keydown", (e) => {
   if (e.code === "Escape" && game && getComputedStyle(game).display !== "none") {
-    exitToMenu();
+    // Si la encuesta NO está abierta: abrirla (y NO salir)
+    if (!isEncuestaAbierta()) {
+      // evitar que se ejecute el handler anterior que hacía exitToMenu
+      e.preventDefault();
+      // mostrar encuesta según la enfermedad actual expuesta por el canvas
+      const enf = window.enfermedadActual || 'dislexia';
+      mostrarEncuesta(enf);
+      return;
+    }
+    // Si la encuesta está abierta, dejar que su propio handler la cierre.
+    // No llamamos exitToMenu hasta que la encuesta esté cerrada y el usuario vuelva a presionar ESC o use el botón Salir.
   }
 });

@@ -6,6 +6,8 @@ import {
 } from "./enfermedades/dislexia.js";
 import { toggleEsquizofrenia } from "./enfermedades/esquizofrenia.js";
 import { toggleAnsiedad } from "./enfermedades/ansiedad.js";
+// IMPORT: verificar si la encuesta está abierta para bloquear shortcuts mientras tanto
+import { isEncuestaAbierta } from "./encuestas.js";
 
 function manejarEventosTeclado(
   camara,
@@ -239,6 +241,29 @@ Finalmente, el agua que cae puede infiltrarse en el suelo alimentando los acuíf
   window.addEventListener("keydown", (e) => {
     if (e.repeat) return;
 
+    // permitir escribir en inputs/textarea y contenido editable aunque la encuesta esté abierta
+    const target = e.target || e.srcElement;
+    const tag = target && target.tagName ? target.tagName.toLowerCase() : "";
+    const escribiendoEnCampo = tag === "input" || tag === "textarea" || target.isContentEditable;
+
+    // Si la encuesta está abierta, bloquear SOLO los atajos especiales de la experiencia
+    if (typeof isEncuestaAbierta === "function" && isEncuestaAbierta()) {
+      // si el usuario está escribiendo en un campo del formulario, dejar pasar la tecla
+      if (escribiendoEnCampo) return;
+
+      // Bloquear los atajos que interfieren con la encuesta
+      const shortcutsBloqueados = ["KeyC", "KeyP", "KeyO"];
+      if (shortcutsBloqueados.includes(e.code)) {
+        e.stopPropagation();
+        e.preventDefault();
+        return;
+      }
+
+      // Si no es un atajo especial, no interferimos (permitir otras teclas globales)
+      return;
+    }
+
+    // --- Comportamiento normal cuando no hay encuesta abierta ---
     if (e.code === "KeyC") {
       console.log("[Teclado] C presionada → toggle experiencia:", enfermedad);
       switch (enfermedad) {
@@ -269,7 +294,6 @@ Finalmente, el agua que cae puede infiltrarse en el suelo alimentando los acuíf
     }
 
     if (e.code === "KeyO") {
-      // Presionar O: mirar y mostrar texto informativo (ciclo del agua)
       reproducirLookYMostrarTexto();
     }
   });
