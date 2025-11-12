@@ -67,8 +67,12 @@ const $$ = (sel, scope = document) => scope.querySelectorAll(sel);
   const btn  = $("#navToggle");
   const menu = $("#navMenu");
   if (!btn || !menu) return;
-  btn.addEventListener("click", () => menu.classList.toggle("open"));
-  menu.addEventListener("click", (e) => { if (e.target.tagName === "A") menu.classList.remove("open"); });
+  const updateExpanded = () => {
+    const isOpen = menu.classList.contains("open");
+    btn.setAttribute("aria-expanded", String(isOpen));
+  };
+  btn.addEventListener("click", () => { menu.classList.toggle("open"); updateExpanded(); });
+  menu.addEventListener("click", (e) => { if (e.target.tagName === "A") { menu.classList.remove("open"); updateExpanded(); } });
 })();
 
 /* =============== Estado UI =============== */

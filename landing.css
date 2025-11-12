@@ -12,11 +12,35 @@
 
 *{box-sizing:border-box}
 html,body{height:100%}
+html{ scroll-behavior:smooth; overflow-x:hidden }
 body{
   font-family:"Nunito Sans",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
   margin:0; color:var(--text);
   background: radial-gradient(1200px 1200px at 80% -200px, #1b2552 0%, #0c1229 50%, #080b19 100%), var(--bg);
+  overflow-y:auto !important; overflow-x:hidden !important;
 }
+body.no-scroll{ overflow:hidden !important }
+
+#experiencias, #como-jugar, #objetivos, #sobre{ scroll-margin-top:80px }
+
+/* Reveal on scroll */
+.reveal{ opacity:0; transform: translateY(18px); transition: opacity .6s ease, transform .6s ease }
+.reveal.in{ opacity:1; transform:none }
+
+/* Blindaje visual al salir */
+body.exiting .threejsCanvas{ display:none !important; visibility:hidden !important; opacity:0 !important }
+
+/* Respeto a usuarios con “reducir movimiento” */
+@media (prefers-reduced-motion: reduce){
+  .hero__bg, .exp-card{ animation:none !important; transition:none !important }
+}
+
+/* Botón salir por encima de la carga */
+.btn-exit{ position:fixed; top:14px; left:14px; z-index:10050; border-radius:10px; padding:10px 14px; opacity:.98 }
+.btn-exit:hover{ opacity:1 }
+
+/* La pantalla de carga no bloquea clics al botón que va por encima */
+.pantalla-carga{ pointer-events:none }
 
 /* NAV */
 .nav{
@@ -73,6 +97,31 @@ body{
 .btn--primary:hover::after{transform: translateX(120%)}
 .btn--ghost{background:transparent;border-color:var(--border); color:var(--text)}
 .btn--ghost:hover{border-color:#fff2}
+
+/* Accesibilidad: foco visible */
+.btn:focus-visible, .nav__right a:focus-visible, .start-sim:focus-visible, .btn-exit:focus-visible {
+  outline: 2px solid var(--brand-2);
+  outline-offset: 2px;
+}
+
+/* Botones deshabilitados */
+.btn[disabled] {
+  opacity: .6;
+  cursor: not-allowed;
+}
+
+/* Card Próximamente */
+.exp-card[aria-disabled='true'] {
+  opacity: .85;
+}
+.exp-card[aria-disabled='true']:hover {
+  transform: none;
+  box-shadow: none;
+}
+.exp-card[aria-disabled='true'] .exp-card__actions .btn {
+  pointer-events: none;
+  cursor: not-allowed;
+}
 
 /* Tarjeta tipo terminal */
 .hero__visual{position:relative}
@@ -203,6 +252,27 @@ body{
 .footer__inner{max-width:1100px; margin:0 auto; display:flex; gap:10px; justify-content:space-between; align-items:center}
 .footer a{color:var(--muted); text-decoration:none}
 .footer a:hover{color:var(--text)}
+
+/* Skip link */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+.skip-link:focus {
+  left: 12px;
+  top: 12px;
+  width: auto;
+  height: auto;
+  padding: 8px 12px;
+  background: #0e1835;
+  border: 1px solid #22305f;
+  border-radius: 8px;
+  z-index: 10060;
+}
 
 /* Mobile */
 @media (max-width: 980px){
